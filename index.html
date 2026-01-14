@@ -1,0 +1,1139 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- Changed app name -->
+    <title>Malayalam Melody</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#00ff66',
+                        dark: '#050505',
+                        glass: 'rgba(255, 255, 255, 0.03)',
+                    },
+                    animation: {
+                        'spin-slow': 'spin 8s linear infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --primary: #00ff66;
+            --primary-glow: rgba(0, 255, 102, 0.5);
+            --safe-area-bottom: env(safe-area-inset-bottom);
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Disable text selection/copy */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        /* Allow selection only in search input */
+        input[type="text"] {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
+        /* Premium Noise Texture */
+        .noise-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 5;
+            mix-blend-mode: overlay;
+        }
+
+        /* Glassmorphism System */
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        .glass-card:active {
+            transform: scale(0.98);
+            background: rgba(255,255,255,0.08);
+        }
+
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        input[type=range]::-webkit-slider-runnable-track {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 4px;
+            width: 4px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: -100vw 0 0 100vw var(--primary); /* Fill trick */
+            border: none;
+        }
+
+        /* Scrollbar Hiding */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Device Frame for Desktop View */
+        #device-frame {
+            position: relative;
+            background: #000;
+            width: 100vw;
+            height: 100dvh;
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            #device-frame {
+                width: 400px;
+                height: 850px;
+                margin: 2rem auto;
+                border-radius: 48px;
+                box-shadow: 
+                    0 0 0 12px #1a1a1a,
+                    0 0 0 14px #2a2a2a,
+                    0 50px 100px -20px rgba(0,0,0,0.8);
+            }
+        }
+
+        /* Animations */
+        .page-enter {
+            animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .playing-wave span {
+            display: inline-block;
+            width: 3px;
+            background-color: var(--primary);
+            border-radius: 99px;
+            animation: wave 1s ease-in-out infinite;
+        }
+        
+        @keyframes wave {
+            0%, 100% { height: 4px; }
+            50% { height: 16px; }
+        }
+        
+        .playing-wave span:nth-child(2) { animation-delay: 0.1s; }
+        .playing-wave span:nth-child(3) { animation-delay: 0.2s; }
+        .playing-wave span:nth-child(4) { animation-delay: 0.3s; }
+
+        .album-shadow {
+            position: absolute;
+            bottom: -20px;
+            left: 5%;
+            width: 90%;
+            height: 20px;
+            background: var(--primary);
+            filter: blur(30px);
+            opacity: 0.3;
+            z-index: -1;
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-[#111]">
+
+    <!-- Desktop wrapper background (only visible on large screens) -->
+    <div class="fixed inset-0 hidden md:block z-0">
+        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center opacity-20 blur-xl scale-110"></div>
+    </div>
+
+    <!-- Main Device Frame -->
+    <div id="device-frame">
+        <!-- Noise Texture -->
+        <div class="noise-overlay"></div>
+
+        <!-- Ambient Glows -->
+        <div class="absolute top-[-20%] left-[-20%] w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full animate-float pointer-events-none"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-blue-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+
+        <!-- Audio Engine -->
+        <audio id="audio-engine" crossorigin="anonymous"></audio>
+
+        <!-- Loading View -->
+        <div id="loader" class="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center transition-opacity duration-700">
+            <div class="relative w-20 h-20">
+                <div class="absolute inset-0 border-t-2 border-primary rounded-full animate-spin"></div>
+                <div class="absolute inset-2 border-r-2 border-white/20 rounded-full animate-spin-slow"></div>
+                <!-- Changed logo -->
+                <i class="ph-fill ph-music-notes absolute inset-0 flex items-center justify-center text-3xl text-primary animate-pulse"></i>
+            </div>
+            <!-- Changed app name -->
+            <h1 class="mt-6 text-xl font-bold tracking-[0.3em] text-white/80">MALAYALAM MELODY</h1>
+        </div>
+
+        <!-- Main Interface -->
+        <main class="relative h-full w-full overflow-hidden flex flex-col">
+            
+            <!-- Top Header -->
+            <header class="flex justify-between items-center px-6 pt-12 pb-4 z-20">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-black border border-white/10 overflow-hidden">
+                        <!-- Changed user image and name -->
+                        <img src="https://i.pinimg.com/736x/28/46/92/284692af9ce184301bbf4eb21166ad87.jpg" class="w-full h-full object-cover opacity-80">
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] uppercase text-white/50 tracking-wider font-bold">Welcome to</span>
+                        <!-- Changed user greeting -->
+                        <span class="text-sm font-bold">Malayalam Music</span>
+                    </div>
+                </div>
+                <button class="w-10 h-10 rounded-full glass-card flex items-center justify-center hover:bg-white/10 active:scale-95">
+                    <i class="ph ph-bell text-xl"></i>
+                </button>
+            </header>
+
+            <!-- Scrollable Content -->
+            <div id="content-scroll" class="flex-1 overflow-y-auto no-scrollbar pb-32 px-6 relative z-10 space-y-8">
+                
+                <!-- Home View -->
+                <div id="view-home" class="page-enter">
+                    <!-- Featured Card -->
+                    <div class="relative w-full aspect-[16/10] rounded-3xl overflow-hidden group cursor-pointer shadow-2xl" onclick="playTrack(0)">
+                        <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmIwOTI4bjM3MTB1NGs3ZW83aW0wYmlwMDFpMjd2ZmRiZ2NjZGxndiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/OmcqoK1Zr5P0c/giphy.gif" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
+                        <div class="absolute bottom-6 left-6 right-6">
+                            <span class="px-2 py-1 rounded bg-primary text-black text-[10px] font-bold uppercase tracking-widest mb-2 inline-block">Featured</span>
+                            <h2 class="text-3xl font-bold leading-tight mb-1">Malayalam Classics</h2>
+                            <p class="text-white/70 text-sm">Timeless Melodies Collection</p>
+                        </div>
+                        <button class="absolute bottom-6 right-6 w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 group-hover:bg-primary group-hover:text-black group-hover:border-primary transition-all duration-300">
+                            <i class="ph-fill ph-play text-xl ml-1"></i>
+                        </button>
+                    </div>
+
+                    <!-- Genre Recommendations (Dynamic) -->
+                    <div class="mt-8" id="genre-recommendations">
+                        <div class="flex justify-between items-end mb-4">
+                            <h3 class="text-lg font-bold">Recommended For You</h3>
+                        </div>
+                        <div class="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-6 px-6" id="recommended-songs">
+                            <!-- Will be dynamically populated -->
+                        </div>
+                    </div>
+
+                    <!-- All Songs List -->
+                    <div class="mt-4">
+                        <h3 class="text-lg font-bold mb-4">All Songs</h3>
+                        <div class="space-y-3" id="all-songs-list">
+                            <!-- Will be dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search View (Hidden by default) -->
+                <div id="view-search" class="hidden page-enter">
+                    <h2 class="text-3xl font-bold mb-6">Discover</h2>
+                    <div class="glass-panel p-4 rounded-2xl flex items-center gap-3 mb-8 sticky top-0 z-20">
+                        <i class="ph ph-magnifying-glass text-xl text-white/50"></i>
+                        <input type="text" id="search-input" placeholder="Search songs, artists..." class="bg-transparent w-full outline-none text-white placeholder-white/30 font-medium">
+                    </div>
+                    <div class="space-y-3" id="search-results">
+                        <!-- Search results will appear here -->
+                    </div>
+                </div>
+
+                 <!-- Library View (Hidden by default) -->
+                 <div id="view-library" class="hidden page-enter">
+                    <h2 class="text-3xl font-bold mb-6">Your Library</h2>
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-primary to-emerald-800 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,255,102,0.3)]">
+                            <i class="ph-fill ph-heart text-2xl text-black"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">Recently Played</h3>
+                            <p class="text-sm text-white/50" id="recent-count">0 tracks</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2" id="recently-played-list">
+                        <!-- Recently played songs will appear here -->
+                        <div class="text-center py-8 text-white/40" id="no-recent-message">
+                            <i class="ph ph-music-notes text-4xl mb-2"></i>
+                            <p>No recently played songs</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Navigation Bar -->
+            <nav class="absolute bottom-0 w-full h-[90px] bg-black/40 backdrop-blur-xl border-t border-white/10 z-30 flex justify-around items-start pt-4 pb-[env(safe-area-inset-bottom)]">
+                <button onclick="switchView('home')" class="nav-btn group flex flex-col items-center gap-1 w-16 text-primary">
+                    <i class="ph-fill ph-house text-2xl group-active:scale-90 transition-transform"></i>
+                    <span class="text-[10px] font-bold tracking-wide">Home</span>
+                </button>
+                <button onclick="switchView('search')" class="nav-btn group flex flex-col items-center gap-1 w-16 text-white/40 hover:text-white transition-colors">
+                    <i class="ph ph-magnifying-glass text-2xl group-active:scale-90 transition-transform"></i>
+                    <span class="text-[10px] font-bold tracking-wide">Search</span>
+                </button>
+                <button onclick="switchView('library')" class="nav-btn group flex flex-col items-center gap-1 w-16 text-white/40 hover:text-white transition-colors">
+                    <i class="ph ph-books text-2xl group-active:scale-90 transition-transform"></i>
+                    <span class="text-[10px] font-bold tracking-wide">Library</span>
+                </button>
+            </nav>
+
+            <!-- Mini Player (Floating) -->
+            <div id="mini-player" onclick="toggleFullPlayer(true)" class="absolute bottom-[96px] left-4 right-4 h-16 glass-panel rounded-2xl flex items-center p-2 pr-4 gap-3 shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-40 transform translate-y-[200%] transition-transform duration-500 cursor-pointer overflow-hidden border border-white/10">
+                <div class="w-12 h-12 rounded-lg bg-gray-800 overflow-hidden relative shadow-lg">
+                     <img id="mini-art" src="" class="w-full h-full object-cover animate-[spin_10s_linear_infinite]">
+                     <div class="absolute inset-0 bg-black/10"></div>
+                </div>
+                <div class="flex-1 min-w-0 flex flex-col justify-center">
+                    <h4 id="mini-title" class="text-sm font-bold truncate">Song Title</h4>
+                    <p id="mini-artist" class="text-[10px] text-primary truncate uppercase tracking-wider">Artist</p>
+                </div>
+                <div class="flex items-center gap-4 z-10">
+                     <!-- Visualizer bars -->
+                     <div class="playing-wave hidden" id="mini-wave">
+                        <span></span><span></span><span></span><span></span>
+                    </div>
+                    <button id="mini-play-btn" onclick="event.stopPropagation(); togglePlay()" class="text-white hover:text-primary transition-colors">
+                        <i class="ph-fill ph-play text-2xl"></i>
+                    </button>
+                </div>
+                <!-- Progress Bar Background -->
+                <div class="absolute bottom-0 left-0 h-[2px] bg-white/10 w-full">
+                    <div id="mini-progress-bar" class="h-full bg-primary w-0 transition-[width] duration-100 ease-linear"></div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Full Player Overlay -->
+        <div id="full-player" class="absolute inset-0 bg-[#0a0a0a]/95 backdrop-blur-3xl z-50 transform translate-y-[100%] transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) flex flex-col">
+            <!-- Background Blur Effect -->
+            <div class="absolute inset-0 z-0 overflow-hidden opacity-40">
+                <img id="blur-bg" src="" class="w-full h-full object-cover blur-[80px] scale-150">
+            </div>
+
+            <div class="relative z-10 flex flex-col h-full px-8 pb-8 pt-4">
+                <!-- Handle -->
+                <div class="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" onclick="toggleFullPlayer(false)"></div>
+
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-8">
+                    <button onclick="toggleFullPlayer(false)" class="w-10 h-10 rounded-full glass-card flex items-center justify-center active:scale-95 transition-transform">
+                        <i class="ph ph-caret-down text-xl"></i>
+                    </button>
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">Now Playing</span>
+                    <button class="w-10 h-10 rounded-full glass-card flex items-center justify-center active:scale-95 transition-transform">
+                        <i class="ph ph-dots-three text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Album Art Area -->
+                <div class="flex-1 flex flex-col justify-center items-center relative mb-8">
+                    <div class="relative w-full max-w-[320px] aspect-square">
+                        <div class="album-shadow" id="album-glow"></div>
+                        <div class="w-full h-full rounded-3xl overflow-hidden shadow-[0_20px_50px_-10px_rgba(0,0,0,0.5)] border border-white/10">
+                            <img id="full-art" src="" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info -->
+                <div class="flex justify-between items-end mb-8">
+                    <div class="flex-1 mr-4">
+                        <h2 id="full-title" class="text-2xl font-bold leading-tight mb-1 line-clamp-1">Song Title</h2>
+                        <p id="full-artist" class="text-lg text-primary font-medium opacity-90 line-clamp-1">Artist Name</p>
+                    </div>
+                    <button id="like-btn" onclick="toggleLike()" class="mb-1 text-white/30 hover:text-red-500 active:scale-125 transition-all duration-300">
+                        <i class="ph-fill ph-heart text-3xl"></i>
+                    </button>
+                </div>
+
+                <!-- Scrubber -->
+                <div class="mb-8 group">
+                    <input type="range" id="seek-slider" min="0" max="100" value="0" class="w-full relative z-20">
+                    <div class="flex justify-between text-[10px] font-bold text-white/40 mt-2 font-mono tracking-widest">
+                        <span id="current-time">0:00</span>
+                        <span id="duration">0:00</span>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex items-center justify-between px-2 mb-8">
+                    <button id="shuffle-btn" class="text-white/40 hover:text-white transition-colors" onclick="toggleShuffle()">
+                        <i class="ph ph-shuffle text-2xl"></i>
+                    </button>
+                    
+                    <div class="flex items-center gap-6">
+                        <button class="text-white hover:text-primary transition-colors active:scale-90 transform" onclick="previousTrack()">
+                            <i class="ph-fill ph-skip-back text-3xl"></i>
+                        </button>
+                        
+                        <button onclick="togglePlay()" class="w-20 h-20 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[0_0_40px_rgba(255,255,255,0.2)]">
+                            <i id="main-play-icon" class="ph-fill ph-play text-4xl ml-1"></i>
+                        </button>
+                        
+                        <button class="text-white hover:text-primary transition-colors active:scale-90 transform" onclick="nextTrack()">
+                            <i class="ph-fill ph-skip-forward text-3xl"></i>
+                        </button>
+                    </div>
+
+                    <button id="loop-btn" class="text-white/40 hover:text-white transition-colors" onclick="toggleLoop()">
+                        <i class="ph ph-repeat text-2xl"></i>
+                    </button>
+                </div>
+                
+                <!-- Bottom Action -->
+                <div class="flex justify-center">
+                    <div class="glass-card px-4 py-2 rounded-full flex items-center gap-2 cursor-pointer hover:bg-white/10">
+                        <i class="ph ph-speaker-hifi text-primary"></i>
+                        <span class="text-xs font-bold text-white/60">AirPlay & Bluetooth</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Data ---
+        const defaultPlaylist = [
+            // Golden Brown (kept as one international track)
+            {
+                title: "Golden Brown",
+                artist: "The Stranglers",
+                src: "https://files.catbox.moe/5oidq1.m4a",
+                cover: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000",
+                genre: "international"
+            },
+            // Push The Feeling On
+            {
+                title: "Push The Feeling On",
+                artist: "Nightcrawlers",
+                src: "https://files.catbox.moe/h0h4nm.mp3",
+                cover: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=1000",
+                genre: "electronic"
+            },
+            // Malayalam songs with genres
+            {
+                title: "Chirimanimulle",
+                artist: "Malayalam Folk Song",
+                src: "https://files.catbox.moe/5j04ex.m4a",
+                cover: "https://imgs.search.brave.com/QrrIH-kCQu0X5tla9-b51gm30F0kERHXScmq6Fd-sBw/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9R/c3l6aTg5SDlqQS9t/cWRlZmF1bHQuanBn",
+                genre: "malayalam-folk"
+            },
+            {
+                title: "Sudari Onnu Parayu",
+                artist: "Malayalam Romantic",
+                src: "https://files.catbox.moe/r5ouoy.m4a",
+                cover: "https://imgs.search.brave.com/RxY-4lgBVtIGQQIMgHClZNp4WiBbPir0G9k18Oc7DNU/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9seXJp/Y3NyYWFnLmNvbS93/cC1jb250ZW50L3Vw/bG9hZHMvMjAyNS8x/Mi9zdW5kYXJpLW9u/bnUtcGFyYXl1LWxp/b24tdHJhbnNsYXRp/b24ud2VicA",
+                genre: "malayalam-romantic"
+            },
+            {
+                title: "Ariyathe Ariyathe",
+                artist: "Malayalam Melody",
+                src: "https://files.catbox.moe/thgeui.m4a",
+                cover: "https://imgs.search.brave.com/IGPMbpWWn3oPkeL_g0KpecHT51aHzTBDAVx9Z7DWG7s/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9k/aWtDOFVteHhuRS9t/YXhyZXNkZWZhdWx0/LmpwZw",
+                genre: "malayalam-melody"
+            },
+            {
+                title: "Pathinalam Ravinte",
+                artist: "Malayalam Classic",
+                src: "https://files.catbox.moe/c99hv2.m4a",
+                cover: "https://imgs.search.brave.com/uvTaC8enpU4gCDqSmrdp98pr0LjLMZum8AA9vCBHQDE/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9hbGxp/bmRpYWthcmFva2Vz/LmNvbS9tZWRpYS9j/YXRhbG9nL3Byb2R1/Y3QvY2FjaGUvODc3/ODE4MTMxYTg0MmUz/MGE2YWUwN2NkNzZm/OTM1ZGQvcy9oL3No/YXJqYS10by1zaGFy/amEtbWFsYXlhbGFt/LTIwMTktMjAxOTA5/MTkwMDM0MDgtNTAw/eDUwMF9jbGVhbnVw/XzEuanBn",
+                genre: "malayalam-classic"
+            },
+            {
+                title: "Vaisakha Sandhye",
+                artist: "Malayalam Classic",
+                src: "https://files.catbox.moe/1b4p39.m4a",
+                cover: "https://imgs.search.brave.com/0NuxsBMtEqfxIJQ_nzj4U7lR0VkReeOcwbuMA_VbGxU/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jLnNh/YXZuY2RuLmNvbS8z/MjkvTmFkb2RpLUth/dHR1LU1hbGF5YWxh/bS0xOTg3LTIwMjQw/ODMwMDYyODI5LTUw/MHg1MDAuanBn",
+                genre: "malayalam-classic"
+            },
+            {
+                title: "Avani Ponnunjal Aadikam",
+                artist: "Malayalam Melody",
+                src: "https://files.catbox.moe/k7uaq8.m4a",
+                cover: "https://imgs.search.brave.com/Ht0uyOzUWQ8uYBtQJXT1Amxb78oJiXwZpp54mbrb9PU/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9wYWdh/bGx3b3JsZHMuY29t/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDIz/LzA2L0FhdmFuaS1Q/b25udW5qYWwuanBn",
+                genre: "malayalam-melody"
+            },
+            {
+                title: "Oru Rathri Koodi",
+                artist: "Malayalam Romantic",
+                src: "https://files.catbox.moe/qlputt.m4a",
+                cover: "https://imgs.search.brave.com/YGftVD4TAkktFAdOoiie4y6VLBQJMs9oE3jH3WEtZTs/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9seXJp/Y3NyYWFnLmNvbS93/cC1jb250ZW50L3Vw/bG9hZHMvMjAyMC8w/Mi9vcnUtcmF0aHJp/LWtvb2RpLWx5cmlj/cy1pbi1lbmdsaXNo/LmpwZw",
+                genre: "malayalam-romantic"
+            },
+            {
+                title: "Thanka Manasu",
+                artist: "Malayalam Melody",
+                src: "https://files.catbox.moe/3p2geo.m4a",
+                cover: "https://imgs.search.brave.com/n-lte4NKG9_-x1-zW0nHFT6U0Brr2Aovb_aX2kFHXro/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9J/dHVmdEhObFM4by9t/cWRlZmF1bHQuanBn",
+                genre: "malayalam-melody"
+            },
+            {
+                title: "Eeran Megham Poovum Kondu",
+                artist: "Malayalam Classic",
+                src: "https://files.catbox.moe/u3qta3.m4a",
+                cover: "https://imgs.search.brave.com/N4GRzIzh82R_WP7Y7fgsz2BGcvYYHDBPOMjA0OI1yX4/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS8x/VHVFaklhUUZaYy9t/YXhyZXNkZWZhdWx0/LmpwZw",
+                genre: "malayalam-classic"
+            },
+            {
+                title: "Oru Chenbaneer",
+                artist: "Malayalam Folk",
+                src: "https://files.catbox.moe/no3385.m4a",
+                cover: "https://imgs.search.brave.com/CMd7AdROO5oIjpg5rsQHHDB_vD6_KMKdIGzPSkhHRDI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9hbGxp/bmRpYWthcmFva2Vz/LmNvbS9tZWRpYS9j/YXRhbG9nL3Byb2R1/Y3QvY2FjaGUvODc3/ODE4MTMxYTg0MmUz/MGE2YWUwN2NkNzZm/OTM1ZGQvcy90L3N0/aGlkaGktbWFsYXlh/bGFtLTIwMS5qcGc",
+                genre: "malayalam-folk"
+            },
+            {
+                title: "Unarumee Gaanam",
+                artist: "Malayalam Melody",
+                src: "https://files.catbox.moe/8z3hf6.m4a",
+                cover: "https://imgs.search.brave.com/U5cSBc0KTUZJXogEW9hY4b29TxFw0MFMqivLmq2L9dk/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9s/NWJhNHdNLUJBTS9t/YXhyZXNkZWZhdWx0/LmpwZw",
+                genre: "malayalam-melody"
+            },
+            {
+                title: "Sreeraagamo Thedunnu",
+                artist: "Malayalam Devotional",
+                src: "https://files.catbox.moe/e8d82z.m4a",
+                cover: "https://imgs.search.brave.com/gbOxCGB12FTtmRjMy2ddjtfoi3lE99HvFU8UvhswgBs/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jLnNh/YXZuY2RuLmNvbS8z/NjcvU3JlZXJhZ2Ft/by1UaGVkdW5udS1O/ZWUtQ292ZXItVmVy/c2lvbi1NYWxheWFs/YW0tMjAyNS0yMDI1/MDcwMzE4NTcxMy01/MDB4NTAwLmpwZw",
+                genre: "malayalam-devotional"
+            },
+            {
+                title: "Karukare Karuthoru",
+                artist: "Malayalam Classic",
+                src: "https://files.catbox.moe/bmrdzy.m4a",
+                cover: "https://imgs.search.brave.com/NPPrJiH_Kv59zV-2bmY9WbyvMl0g_gkSgXN7TmnXO8k/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9hbGxp/bmRpYWthcmFva2Vz/LmNvbS9tZWRpYS9j/YXRhbG9nL3Byb2R1/Y3QvY2FjaGUvODc3/ODE4MTMxYTg0MmUz/MGE2YWUwN2NkNzZm/OTM1ZGQvYi9hL2Jh/bGV0dGFuLW1hbGF5/YWxhbS0yMDAzLTUw/MHg1MDBfMi5qcGc",
+                genre: "malayalam-classic"
+            },
+            {
+                title: "Anthiponvettam",
+                artist: "Malayalam Classic",
+                src: "https://files.catbox.moe/h545er.m4a",
+                cover: "https://imgs.search.brave.com/TlK0ctG4RrHzpjWjGxP7d_9ktICKVLqon2zMmxVppEM/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jLnNh/YXZuY2RuLmNvbS8z/NDUvVmFuZGhhbmFt/LU1hbGF5YWxhbS0x/OTk1LTIwMTkwMTEw/MDUyNjA4LTUwMHg1/MDAuanBn",
+                genre: "malayalam-classic"
+            },
+            {
+                title: "Koottil Ninnum",
+                artist: "Malayalam Devotional",
+                src: "https://files.catbox.moe/iehzkz.m4a",
+                cover: "https://imgs.search.brave.com/wzTGAmmin-31PF50NHHms2Hh1J4Qz3DK_6eSd1tpSLg/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9wZW5k/dWphdHQuY29tLnNl/L3VwbG9hZHMvYWxi/dW0vdGhhbGF2YXR0/b20tcmVnaHVrdW1h/ci53ZWJw",
+                genre: "malayalam-devotional"
+            }
+        ];
+
+        // App State - Load from localStorage or use defaults
+        let playlist = JSON.parse(localStorage.getItem('malayalamMelody_playlist')) || defaultPlaylist;
+        let recentlyPlayed = JSON.parse(localStorage.getItem('malayalamMelody_recentlyPlayed')) || [];
+        let playCounts = JSON.parse(localStorage.getItem('malayalamMelody_playCounts')) || {};
+        let genrePreferences = JSON.parse(localStorage.getItem('malayalamMelody_genrePreferences')) || {};
+        
+        let currentIndex = 0;
+        let isPlaying = false;
+        let isLiked = false;
+        let isLooping = false;
+        let isShuffled = false;
+        let shuffleHistory = [];
+        let currentGenre = null;
+
+        // --- Elements ---
+        const audio = document.getElementById('audio-engine');
+        const miniPlayer = document.getElementById('mini-player');
+        const fullPlayer = document.getElementById('full-player');
+        const loader = document.getElementById('loader');
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+        const recommendedSongs = document.getElementById('recommended-songs');
+        const allSongsList = document.getElementById('all-songs-list');
+        const recentlyPlayedList = document.getElementById('recently-played-list');
+        const noRecentMessage = document.getElementById('no-recent-message');
+        const recentCount = document.getElementById('recent-count');
+        
+        // UI Elements
+        const els = {
+            miniTitle: document.getElementById('mini-title'),
+            miniArtist: document.getElementById('mini-artist'),
+            miniArt: document.getElementById('mini-art'),
+            miniPlayBtn: document.getElementById('mini-play-btn'),
+            miniProgress: document.getElementById('mini-progress-bar'),
+            miniWave: document.getElementById('mini-wave'),
+            
+            fullTitle: document.getElementById('full-title'),
+            fullArtist: document.getElementById('full-artist'),
+            fullArt: document.getElementById('full-art'),
+            blurBg: document.getElementById('blur-bg'),
+            mainPlayIcon: document.getElementById('main-play-icon'),
+            albumGlow: document.getElementById('album-glow'),
+            
+            seek: document.getElementById('seek-slider'),
+            currTime: document.getElementById('current-time'),
+            durTime: document.getElementById('duration'),
+            likeBtn: document.getElementById('like-btn'),
+            loopBtn: document.getElementById('loop-btn'),
+            shuffleBtn: document.getElementById('shuffle-btn')
+        };
+
+        // --- Initialization ---
+        window.onload = () => {
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.remove(), 700);
+            }, 1500);
+            
+            // Initialize UI
+            populateAllSongsList();
+            updateRecentlyPlayedDisplay();
+            updateGenreRecommendations();
+            
+            // Load first track
+            loadTrack(0, false); // Don't autoplay on initial load
+            
+            // Setup search functionality
+            setupSearch();
+        };
+
+        // --- Local Storage Functions ---
+        function saveToLocalStorage() {
+            localStorage.setItem('malayalamMelody_playlist', JSON.stringify(playlist));
+            localStorage.setItem('malayalamMelody_recentlyPlayed', JSON.stringify(recentlyPlayed));
+            localStorage.setItem('malayalamMelody_playCounts', JSON.stringify(playCounts));
+            localStorage.setItem('malayalamMelody_genrePreferences', JSON.stringify(genrePreferences));
+        }
+
+        function updatePlayCount(genre) {
+            if (!genre) return;
+            
+            if (!playCounts[genre]) {
+                playCounts[genre] = 0;
+            }
+            playCounts[genre]++;
+            
+            // Update genre preferences
+            if (!genrePreferences[genre]) {
+                genrePreferences[genre] = 0;
+            }
+            genrePreferences[genre] += 1;
+            
+            saveToLocalStorage();
+        }
+
+        // --- UI Population Functions ---
+        function populateAllSongsList() {
+            allSongsList.innerHTML = '';
+            
+            playlist.forEach((track, index) => {
+                const listItem = createSongListItem(track, index);
+                allSongsList.appendChild(listItem);
+            });
+        }
+
+        function createSongListItem(track, index) {
+            const listItem = document.createElement('div');
+            listItem.className = 'glass-card p-3 rounded-xl flex items-center gap-4 cursor-pointer hover:bg-white/5';
+            listItem.onclick = () => playTrack(index);
+            listItem.innerHTML = `
+                <span class="text-white/30 text-xs font-bold w-4">${(index + 1).toString().padStart(2, '0')}</span>
+                <img src="${track.cover}" class="w-12 h-12 rounded-lg object-cover">
+                <div class="flex-1">
+                    <h4 class="font-bold text-sm">${track.title}</h4>
+                    <p class="text-[10px] text-white/50 uppercase">${track.artist}</p>
+                    <p class="text-[8px] text-primary/70">${track.genre.replace('malayalam-', '').toUpperCase()}</p>
+                </div>
+                <button class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center">
+                    <i class="ph ph-dots-three text-lg"></i>
+                </button>
+            `;
+            return listItem;
+        }
+
+        function updateGenreRecommendations() {
+            recommendedSongs.innerHTML = '';
+            
+            // Get top 3 genres based on play counts
+            const sortedGenres = Object.entries(genrePreferences)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3)
+                .map(entry => entry[0]);
+            
+            // If no genre preferences yet, use some default genres
+            const genresToShow = sortedGenres.length > 0 ? sortedGenres : 
+                ['malayalam-classic', 'malayalam-melody', 'malayalam-romantic'];
+            
+            // Collect 4-6 recommended songs from top genres
+            let recommendedSongsList = [];
+            
+            genresToShow.forEach(genre => {
+                const genreSongs = playlist.filter(track => track.genre === genre);
+                // Take 1-2 songs from each genre
+                const songsToAdd = genreSongs.slice(0, 2);
+                recommendedSongsList = [...recommendedSongsList, ...songsToAdd];
+            });
+            
+            // If still not enough, add random songs
+            if (recommendedSongsList.length < 4) {
+                const remainingSongs = playlist.filter(track => 
+                    !recommendedSongsList.some(rec => rec.title === track.title)
+                );
+                const randomSongs = remainingSongs
+                    .sort(() => 0.5 - Math.random())
+                    .slice(0, 4 - recommendedSongsList.length);
+                recommendedSongsList = [...recommendedSongsList, ...randomSongs];
+            }
+            
+            // Display recommended songs
+            recommendedSongsList.forEach((track, index) => {
+                const trackIndex = playlist.findIndex(t => t.title === track.title);
+                if (trackIndex === -1) return;
+                
+                const card = document.createElement('div');
+                card.className = 'min-w-[140px] group cursor-pointer';
+                card.onclick = () => playTrack(trackIndex);
+                card.innerHTML = `
+                    <div class="w-full aspect-square rounded-2xl overflow-hidden mb-3 relative">
+                        <img src="${track.cover}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <i class="ph-fill ph-play-circle text-4xl text-white"></i>
+                        </div>
+                    </div>
+                    <h4 class="font-bold text-sm truncate">${track.title}</h4>
+                    <p class="text-xs text-white/50 truncate">${track.artist.split('•')[0].trim()}</p>
+                `;
+                recommendedSongs.appendChild(card);
+            });
+            
+            // Update section title
+            const sectionTitle = document.querySelector('#genre-recommendations h3');
+            if (sortedGenres.length > 0) {
+                const topGenre = sortedGenres[0].replace('malayalam-', '');
+                sectionTitle.textContent = `Based on your ${topGenre} preference`;
+            } else {
+                sectionTitle.textContent = 'Popular Malayalam Songs';
+            }
+        }
+
+        // --- Search Functionality ---
+        function setupSearch() {
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                
+                if (searchTerm.length === 0) {
+                    searchResults.innerHTML = '<p class="text-white/40 text-center py-8">Type to search for songs</p>';
+                    return;
+                }
+                
+                // Filter playlist based on search term
+                const filteredSongs = playlist.filter(track => 
+                    track.title.toLowerCase().includes(searchTerm) || 
+                    track.artist.toLowerCase().includes(searchTerm) ||
+                    track.genre.toLowerCase().includes(searchTerm)
+                );
+                
+                // Display results
+                searchResults.innerHTML = '';
+                
+                if (filteredSongs.length === 0) {
+                    searchResults.innerHTML = '<p class="text-white/40 text-center py-8">No songs found</p>';
+                    return;
+                }
+                
+                filteredSongs.forEach((track, index) => {
+                    const trackIndex = playlist.findIndex(t => t.title === track.title);
+                    const listItem = createSongListItem(track, trackIndex);
+                    searchResults.appendChild(listItem);
+                });
+            });
+        }
+
+        // --- Recently Played / Local Storage ---
+        function addToRecentlyPlayed(trackIndex) {
+            const track = playlist[trackIndex];
+            const playRecord = {
+                index: trackIndex,
+                title: track.title,
+                artist: track.artist,
+                cover: track.cover,
+                genre: track.genre,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Remove if already exists
+            recentlyPlayed = recentlyPlayed.filter(item => item.index !== trackIndex);
+            
+            // Add to beginning
+            recentlyPlayed.unshift(playRecord);
+            
+            // Keep only last 10
+            if (recentlyPlayed.length > 10) {
+                recentlyPlayed = recentlyPlayed.slice(0, 10);
+            }
+            
+            // Update play count for genre
+            updatePlayCount(track.genre);
+            
+            // Save to localStorage
+            saveToLocalStorage();
+            
+            // Update display
+            updateRecentlyPlayedDisplay();
+        }
+
+        function updateRecentlyPlayedDisplay() {
+            recentlyPlayedList.innerHTML = '';
+            
+            if (recentlyPlayed.length === 0) {
+                noRecentMessage.classList.remove('hidden');
+                recentCount.textContent = '0 tracks';
+                return;
+            }
+            
+            noRecentMessage.classList.add('hidden');
+            recentCount.textContent = `${recentlyPlayed.length} track${recentlyPlayed.length > 1 ? 's' : ''}`;
+            
+            recentlyPlayed.forEach((playRecord, index) => {
+                const listItem = document.createElement('div');
+                listItem.className = 'glass-card p-3 rounded-xl flex items-center gap-4 cursor-pointer hover:bg-white/5';
+                listItem.onclick = () => playTrack(playRecord.index);
+                listItem.innerHTML = `
+                    <span class="text-white/30 text-xs font-bold w-4">${index + 1}</span>
+                    <img src="${playRecord.cover}" class="w-12 h-12 rounded-lg object-cover">
+                    <div class="flex-1">
+                        <h4 class="font-bold text-sm">${playRecord.title}</h4>
+                        <p class="text-[10px] text-white/50 uppercase">${playRecord.artist}</p>
+                        <p class="text-[8px] text-white/20">Recently played</p>
+                    </div>
+                    <button class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center">
+                        <i class="ph ph-play text-lg"></i>
+                    </button>
+                `;
+                recentlyPlayedList.appendChild(listItem);
+            });
+        }
+
+        // --- Core Music Functions ---
+        function loadTrack(index, shouldPlay = true) {
+            currentIndex = index;
+            const track = playlist[index];
+            
+            audio.src = track.src;
+            
+            // Update UI Text
+            els.miniTitle.innerText = track.title;
+            els.miniArtist.innerText = track.artist;
+            els.fullTitle.innerText = track.title;
+            els.fullArtist.innerText = track.artist;
+            
+            // Update Images
+            els.miniArt.src = track.cover;
+            els.fullArt.src = track.cover;
+            els.blurBg.src = track.cover;
+            
+            // Update genre recommendations
+            currentGenre = track.genre;
+            
+            // Add to recently played
+            addToRecentlyPlayed(index);
+            
+            // Reset progress
+            els.miniProgress.style.width = '0%';
+            els.seek.value = 0;
+            els.currTime.innerText = '0:00';
+            
+            // Always show mini player when loading a track
+            miniPlayer.classList.remove('translate-y-[200%]');
+            miniPlayer.classList.add('translate-y-0');
+            
+            // Update play state to false initially
+            updatePlayState(false);
+            
+            // Auto-play the track if shouldPlay is true
+            if (shouldPlay) {
+                setTimeout(() => {
+                    audio.play().catch(e => console.log("Auto-play prevented:", e));
+                }, 100);
+            }
+        }
+
+        function playTrack(index) {
+            if(index !== currentIndex) {
+                // Load and auto-play the new track
+                loadTrack(index, true);
+            } else {
+                // Toggle play/pause for current track
+                togglePlay();
+            }
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                audio.pause();
+            } else {
+                audio.play().catch(e => console.log("Play error:", e));
+                // Ensure mini player is visible if playing starts
+                miniPlayer.classList.remove('translate-y-[200%]');
+                miniPlayer.classList.add('translate-y-0');
+            }
+        }
+
+        function updatePlayState(playing) {
+            isPlaying = playing;
+            const icon = playing ? 'ph-pause' : 'ph-play';
+            
+            els.mainPlayIcon.className = `ph-fill ${icon} text-4xl ml-1`;
+            els.miniPlayBtn.innerHTML = `<i class="ph-fill ${icon} text-2xl"></i>`;
+            
+            // Animations
+            if(playing) {
+                els.miniArt.style.animationPlayState = 'running';
+                els.albumGlow.style.opacity = '0.6';
+                els.albumGlow.style.filter = 'blur(40px)';
+                els.miniWave.classList.remove('hidden');
+            } else {
+                els.miniArt.style.animationPlayState = 'paused';
+                els.albumGlow.style.opacity = '0.3';
+                els.albumGlow.style.filter = 'blur(30px)';
+                els.miniWave.classList.add('hidden');
+            }
+        }
+
+        function toggleLoop() {
+            isLooping = !isLooping;
+            audio.loop = isLooping;
+            
+            const loopIcon = els.loopBtn.querySelector('i');
+            if(isLooping) {
+                loopIcon.classList.remove('ph-repeat');
+                loopIcon.classList.add('ph-repeat-once');
+                els.loopBtn.classList.remove('text-white/40');
+                els.loopBtn.classList.add('text-primary');
+            } else {
+                loopIcon.classList.remove('ph-repeat-once');
+                loopIcon.classList.add('ph-repeat');
+                els.loopBtn.classList.remove('text-primary');
+                els.loopBtn.classList.add('text-white/40');
+            }
+        }
+
+        function toggleShuffle() {
+            isShuffled = !isShuffled;
+            
+            if(isShuffled) {
+                // Reset shuffle history when turning shuffle on
+                shuffleHistory = [currentIndex];
+                els.shuffleBtn.classList.remove('text-white/40');
+                els.shuffleBtn.classList.add('text-primary');
+            } else {
+                els.shuffleBtn.classList.remove('text-primary');
+                els.shuffleBtn.classList.add('text-white/40');
+            }
+        }
+
+        function nextTrack() {
+            if(isShuffled) {
+                // For shuffled mode, pick a random track but not the current one
+                let newIndex;
+                do {
+                    newIndex = Math.floor(Math.random() * playlist.length);
+                } while(newIndex === currentIndex && playlist.length > 1);
+                
+                // Add to shuffle history
+                shuffleHistory.push(newIndex);
+                if (shuffleHistory.length > 50) shuffleHistory.shift();
+                
+                currentIndex = newIndex;
+            } else {
+                // Normal sequential mode
+                currentIndex = (currentIndex + 1) % playlist.length;
+            }
+            
+            // Load and auto-play the next track
+            loadTrack(currentIndex, true);
+        }
+
+        function previousTrack() {
+            if(isShuffled && shuffleHistory.length > 1) {
+                // Go back in shuffle history
+                shuffleHistory.pop(); // Remove current
+                const prevIndex = shuffleHistory.pop(); // Get previous
+                if (prevIndex !== undefined) {
+                    currentIndex = prevIndex;
+                    shuffleHistory.push(currentIndex); // Add back
+                }
+            } else {
+                // Normal sequential mode
+                currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+            }
+            
+            // Load and auto-play the previous track
+            loadTrack(currentIndex, true);
+        }
+
+        // Audio Events
+        audio.onplay = () => updatePlayState(true);
+        audio.onpause = () => updatePlayState(false);
+        
+        audio.onended = () => {
+            if(!isLooping) {
+                // Auto play next song when current ends (only if loop is off)
+                setTimeout(() => {
+                    nextTrack();
+                }, 500);
+            } else {
+                // If loop is on, the current song will repeat automatically
+                // because audio.loop = true
+            }
+        };
+        
+        audio.ontimeupdate = () => {
+            if (audio.duration) {
+                const pct = (audio.currentTime / audio.duration) * 100;
+                els.miniProgress.style.width = `${pct}%`;
+                els.seek.value = pct || 0;
+                
+                els.currTime.innerText = formatTime(audio.currentTime);
+                els.durTime.innerText = formatTime(audio.duration);
+                
+                // Slider Track Fill
+                const val = els.seek.value;
+                els.seek.style.background = `linear-gradient(to right, #00ff66 ${val}%, rgba(255,255,255,0.1) ${val}%)`;
+            }
+        };
+
+        els.seek.oninput = () => {
+            const time = (els.seek.value / 100) * audio.duration;
+            audio.currentTime = time;
+        };
+
+        function skip(sec) {
+            audio.currentTime += sec;
+        }
+
+        function toggleFullPlayer(show) {
+            if(show) {
+                fullPlayer.classList.remove('translate-y-[100%]');
+            } else {
+                fullPlayer.classList.add('translate-y-[100%]');
+            }
+        }
+
+        function toggleLike() {
+            isLiked = !isLiked;
+            const icon = els.likeBtn.querySelector('i');
+            if(isLiked) {
+                els.likeBtn.classList.add('text-red-500');
+                els.likeBtn.classList.remove('text-white/30');
+            } else {
+                els.likeBtn.classList.remove('text-red-500');
+                els.likeBtn.classList.add('text-white/30');
+            }
+        }
+
+        function switchView(viewName) {
+            // Hide all views
+            ['home', 'search', 'library'].forEach(v => {
+                document.getElementById('view-' + v).classList.add('hidden');
+            });
+            // Show target view
+            document.getElementById('view-' + viewName).classList.remove('hidden');
+            
+            // Clear search when leaving search view
+            if (viewName !== 'search') {
+                searchInput.value = '';
+                searchResults.innerHTML = '<p class="text-white/40 text-center py-8">Type to search for songs</p>';
+            }
+            
+            // Update genre recommendations when going to home
+            if (viewName === 'home') {
+                updateGenreRecommendations();
+            }
+            
+            // Update Nav Icons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-primary');
+                btn.classList.add('text-white/40');
+                const i = btn.querySelector('i');
+                i.classList.remove('ph-fill');
+                i.classList.add('ph');
+            });
+            
+            const activeBtn = event.currentTarget;
+            activeBtn.classList.add('text-primary');
+            activeBtn.classList.remove('text-white/40');
+            const activeI = activeBtn.querySelector('i');
+            activeI.classList.remove('ph');
+            activeI.classList.add('ph-fill');
+        }
+
+        function formatTime(s) {
+            if(!s || isNaN(s)) return "0:00";
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60);
+            return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+    </script>
+</body>
+</html>
