@@ -1,1136 +1,1261 @@
+
 <!DOCTYPE html>
-<html lang="en" class="antialiased">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <!-- Changed app name -->
-    <title>Malayalam Melody</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: '#00ff66',
-                        dark: '#050505',
-                        glass: 'rgba(255, 255, 255, 0.03)',
-                    },
-                    animation: {
-                        'spin-slow': 'spin 8s linear infinite',
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'float': 'float 6s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-20px)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Swing · gym & diet</title>
+    <!-- Font Awesome (icons) & Firebase compat SDKs -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        :root {
-            --primary: #00ff66;
-            --primary-glow: rgba(0, 255, 102, 0.5);
-            --safe-area-bottom: env(safe-area-inset-bottom);
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
         }
 
         body {
-            background-color: #000;
-            color: #fff;
+            background: #f5f7fb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
             overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Disable text selection/copy */
-        * {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            -webkit-touch-callout: none;
+        #app {
+            width: 100%;
+            max-width: 430px;
+            background: white;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
+            border-radius: 32px 32px 0 0;
+            overflow: hidden;
+            position: relative;
+            height: 95vh;
+            display: flex;
+            flex-direction: column;
+            margin: 10px;
         }
 
-        /* Allow selection only in search input */
-        input[type="text"] {
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
+        /* Auth screens */
+        #authView {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+            background: linear-gradient(145deg, #f0f4fe, #ffffff);
         }
 
-        /* Premium Noise Texture */
-        .noise-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 5;
-            mix-blend-mode: overlay;
+        .auth-card {
+            background: white;
+            border-radius: 32px;
+            padding: 28px 20px;
+            box-shadow: 0 10px 25px rgba(0, 20, 50, 0.1);
+            width: 100%;
         }
 
-        /* Glassmorphism System */
-        .glass-panel {
-            background: rgba(20, 20, 20, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        .logo {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: #1e2b4f;
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: -0.5px;
         }
 
-        .glass-card {
-            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        .logo span {
+            color: #ff7b4a;
         }
-        
-        .glass-card:active {
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #2e3a5c;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 18px;
+            border: 1.5px solid #e3e9f2;
+            border-radius: 24px;
+            font-size: 1rem;
+            transition: 0.2s;
+            background: #fafcff;
+        }
+
+        .input-group input:focus {
+            border-color: #ff7b4a;
+            outline: none;
+        }
+
+        .btn {
+            background: #1e2b4f;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            width: 100%;
+            margin-top: 8px;
+            transition: 0.2s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-secondary {
+            background: #ff7b4a;
+        }
+
+        .btn:active {
             transform: scale(0.98);
-            background: rgba(255,255,255,0.08);
         }
 
-        /* Custom Range Slider */
-        input[type=range] {
-            -webkit-appearance: none;
-            background: transparent;
-            height: 20px;
+        .toggle-auth {
+            text-align: center;
+            margin-top: 20px;
+            color: #5f6b8a;
+        }
+
+        .toggle-auth button {
+            background: none;
+            border: none;
+            color: #ff7b4a;
+            font-weight: 600;
+            font-size: 1rem;
             cursor: pointer;
         }
-        
-        input[type=range]::-webkit-slider-runnable-track {
-            height: 4px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 2px;
-            overflow: hidden;
+
+        /* Main App layout */
+        .main-app {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            background: #f8faff;
         }
 
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 4px;
-            width: 4px;
+        .header {
+            padding: 20px 18px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border-bottom: 1px solid #eef2f8;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #1e2b4f;
+        }
+
+        .header h1 span {
+            color: #ff7b4a;
+        }
+
+        .header .user-icon {
+            font-size: 1.4rem;
+            color: #2e3a5c;
+            background: #f0f4fe;
+            padding: 10px;
             border-radius: 50%;
-            background: var(--primary);
-            box-shadow: -100vw 0 0 100vw var(--primary); /* Fill trick */
-            border: none;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Scrollbar Hiding */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
 
-        /* Device Frame for Desktop View */
-        #device-frame {
+        .bell-icon {
+            font-size: 1.3rem;
+            color: #2e3a5c;
+            background: #f0f4fe;
+            padding: 10px;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
             position: relative;
-            background: #000;
-            width: 100vw;
-            height: 100dvh;
-            overflow: hidden;
         }
 
-        @media (min-width: 768px) {
-            #device-frame {
-                width: 400px;
-                height: 850px;
-                margin: 2rem auto;
-                border-radius: 48px;
-                box-shadow: 
-                    0 0 0 12px #1a1a1a,
-                    0 0 0 14px #2a2a2a,
-                    0 50px 100px -20px rgba(0,0,0,0.8);
+        .bell-icon .badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #ff7b4a;
+            color: white;
+            font-size: 0.65rem;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            border: 2px solid white;
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px 16px 120px;
+            scroll-behavior: smooth;
+        }
+
+        /* Bottom navigation */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 10px 25px;
+            background: white;
+            border-top: 1px solid #eef2f8;
+            box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.02);
+            z-index: 10;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #8a99b5;
+            transition: 0.2s;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .nav-item i {
+            font-size: 1.5rem;
+            margin-bottom: 3px;
+        }
+
+        .nav-item.active {
+            color: #ff7b4a;
+            font-weight: 600;
+        }
+
+        /* Cards & UI elements */
+        .section-title {
+            font-weight: 600;
+            color: #1e2b4f;
+            margin: 24px 0 12px;
+            font-size: 1.2rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .circle-card {
+            background: white;
+            border-radius: 24px;
+            padding: 18px 10px;
+            text-align: center;
+            box-shadow: 0 8px 18px #e9edf4;
+        }
+
+        .progress-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 10px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: 1s ease-out;
+        }
+
+        .progress-circle inner {
+            background: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: #1e2b4f;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            background: white;
+            padding: 16px;
+            border-radius: 28px;
+        }
+
+        .cal-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            background: #f5f8ff;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            color: #1e2b4f;
+            cursor: pointer;
+        }
+
+        .cal-day.checked {
+            background: #ff7b4a;
+            color: white;
+            font-weight: 600;
+        }
+
+        .cal-day.today {
+            border: 2px solid #ff7b4a;
+        }
+
+        /* Search & Food */
+        .search-box {
+            display: flex;
+            background: white;
+            border-radius: 44px;
+            padding: 5px 5px 5px 20px;
+            margin: 15px 0;
+            border: 1px solid #e9eef6;
+            width: 100%;
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            background: none;
+            padding: 12px 0;
+            font-size: 1rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+        }
+
+        .search-box button {
+            background: #1e2b4f;
+            border: none;
+            color: white;
+            width: 48px;
+            border-radius: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .food-item {
+            background: white;
+            padding: 14px 18px;
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .food-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .food-name {
+            font-weight: 600;
+            color: #1e2b4f;
+        }
+
+        .food-meta {
+            font-size: 0.8rem;
+            color: #8a99b5;
+        }
+
+        .food-stats {
+            font-weight: 700;
+            color: #ff7b4a;
+        }
+
+        /* Chat system */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 400px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 5px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 24px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .bubble .sender {
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .bubble.me {
+            background: #1e2b4f;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 6px;
+        }
+
+        .bubble.other {
+            background: #e9effa;
+            color: #1e2b4f;
+            align-self: flex-start;
+            border-bottom-left-radius: 6px;
+        }
+
+        .chat-footer {
+            display: flex;
+            gap: 8px;
+            background: white;
+            padding: 10px;
+            border-radius: 40px;
+            margin-top: 15px;
+            border: 1px solid #eef2f8;
+        }
+
+        .chat-footer input {
+            flex: 1;
+            border: none;
+            background: #f0f4fe;
+            border-radius: 40px;
+            padding: 14px 18px;
+            font-size: 1rem;
+        }
+
+        .chat-footer input:focus {
+            outline: none;
+        }
+
+        .send-btn {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            color: #ff7b4a;
+            cursor: pointer;
+            padding: 0 10px;
+        }
+
+        /* Leaderboard */
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 12px 18px;
+            border-radius: 40px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .leaderboard-item:active {
+            transform: scale(0.98);
+            background: #f0f4fe;
+        }
+
+        .rank {
+            font-weight: 800;
+            width: 35px;
+            color: #ff7b4a;
+            font-size: 1.1rem;
+        }
+
+        .name {
+            flex: 1;
+            font-weight: 600;
+            color: #1e2b4f;
+        }
+
+        .score {
+            background: #eef2f8;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #1e2b4f;
+        }
+
+        .online-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #42e672;
+            display: inline-block;
+            margin-left: 8px;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(66, 230, 114, 0.5);
+        }
+
+        /* Settings */
+        .settings-option {
+            background: white;
+            padding: 18px 22px;
+            border-radius: 24px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .settings-option span:first-child {
+            font-weight: 600;
+            color: #1e2b4f;
+        }
+
+        .settings-val {
+            color: #8a99b5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .small-note {
+            font-size: 0.8rem;
+            color: #8895b7;
+            margin: 8px 0;
+            text-align: center;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
             }
         }
 
-        /* Animations */
-        .page-enter {
-            animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        /* Modal for Goal / Profile Edit */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
-        @keyframes slideUpFade {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .playing-wave span {
-            display: inline-block;
-            width: 3px;
-            background-color: var(--primary);
-            border-radius: 99px;
-            animation: wave 1s ease-in-out infinite;
-        }
-        
-        @keyframes wave {
-            0%, 100% { height: 4px; }
-            50% { height: 16px; }
-        }
-        
-        .playing-wave span:nth-child(2) { animation-delay: 0.1s; }
-        .playing-wave span:nth-child(3) { animation-delay: 0.2s; }
-        .playing-wave span:nth-child(4) { animation-delay: 0.3s; }
-
-        .album-shadow {
-            position: absolute;
-            bottom: -20px;
-            left: 5%;
-            width: 90%;
-            height: 20px;
-            background: var(--primary);
-            filter: blur(30px);
-            opacity: 0.3;
-            z-index: -1;
-            transition: opacity 0.3s ease;
+        .modal-card {
+            background: white;
+            border-radius: 32px;
+            padding: 30px 24px;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen bg-[#111]">
 
-    <!-- Desktop wrapper background (only visible on large screens) -->
-    <div class="fixed inset-0 hidden md:block z-0">
-        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center opacity-20 blur-xl scale-110"></div>
-    </div>
-
-    <!-- Main Device Frame -->
-    <div id="device-frame">
-        <!-- Noise Texture -->
-        <div class="noise-overlay"></div>
-
-        <!-- Ambient Glows -->
-        <div class="absolute top-[-20%] left-[-20%] w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full animate-float pointer-events-none"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-blue-500/10 blur-[100px] rounded-full pointer-events-none"></div>
-
-        <!-- Audio Engine -->
-        <audio id="audio-engine" crossorigin="anonymous"></audio>
-
-        <!-- Loading View -->
-        <div id="loader" class="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center transition-opacity duration-700">
-            <div class="relative w-20 h-20">
-                <div class="absolute inset-0 border-t-2 border-primary rounded-full animate-spin"></div>
-                <div class="absolute inset-2 border-r-2 border-white/20 rounded-full animate-spin-slow"></div>
-                <!-- Changed logo -->
-                <i class="ph-fill ph-music-notes absolute inset-0 flex items-center justify-center text-3xl text-primary animate-pulse"></i>
-            </div>
-            <!-- Changed app name -->
-            <h1 class="mt-6 text-xl font-bold tracking-[0.3em] text-white/80">MALAYALAM MELODY</h1>
-        </div>
-
-        <!-- Main Interface -->
-        <main class="relative h-full w-full overflow-hidden flex flex-col">
-            
-            <!-- Top Header -->
-            <header class="flex justify-between items-center px-6 pt-12 pb-4 z-20">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-black border border-white/10 overflow-hidden">
-                        <!-- Changed user image and name -->
-                        <img src="https://i.pinimg.com/736x/28/46/92/284692af9ce184301bbf4eb21166ad87.jpg" class="w-full h-full object-cover opacity-80">
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-[10px] uppercase text-white/50 tracking-wider font-bold">Welcome to</span>
-                        <!-- Changed user greeting -->
-                        <span class="text-sm font-bold">Malayalam Music</span>
-                    </div>
+<body>
+    <div id="app">
+        <!-- AUTH View -->
+        <div id="authView">
+            <div class="auth-card">
+                <div class="logo">Swing<span>.</span></div>
+                <div id="loginForm">
+                    <div class="input-group"><label>Email</label><input type="email" id="loginEmail"
+                            placeholder="your@email.com"></div>
+                    <div class="input-group"><label>Password</label><input type="password" id="loginPassword"
+                            placeholder="••••••••"></div>
+                    <button class="btn" id="loginBtn">Log in</button>
                 </div>
-                <button class="w-10 h-10 rounded-full glass-card flex items-center justify-center hover:bg-white/10 active:scale-95">
-                    <i class="ph ph-bell text-xl"></i>
-                </button>
-            </header>
-
-            <!-- Scrollable Content -->
-            <div id="content-scroll" class="flex-1 overflow-y-auto no-scrollbar pb-32 px-6 relative z-10 space-y-8">
-                
-                <!-- Home View -->
-                <div id="view-home" class="page-enter">
-                    <!-- Featured Card -->
-                    <div class="relative w-full aspect-[16/10] rounded-3xl overflow-hidden group cursor-pointer shadow-2xl" onclick="playTrack(0)">
-                        <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmIwOTI4bjM3MTB1NGs3ZW83aW0wYmlwMDFpMjd2ZmRiZ2NjZGxndiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/OmcqoK1Zr5P0c/giphy.gif" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-                        <div class="absolute bottom-6 left-6 right-6">
-                            <span class="px-2 py-1 rounded bg-primary text-black text-[10px] font-bold uppercase tracking-widest mb-2 inline-block">Featured</span>
-                            <h2 class="text-3xl font-bold leading-tight mb-1">Malayalam Classics</h2>
-                            <p class="text-white/70 text-sm">Timeless Melodies Collection</p>
-                        </div>
-                        <button class="absolute bottom-6 right-6 w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 group-hover:bg-primary group-hover:text-black group-hover:border-primary transition-all duration-300">
-                            <i class="ph-fill ph-play text-xl ml-1"></i>
-                        </button>
-                    </div>
-
-                    <!-- Genre Recommendations (Dynamic) -->
-                    <div class="mt-8" id="genre-recommendations">
-                        <div class="flex justify-between items-end mb-4">
-                            <h3 class="text-lg font-bold">Recommended For You</h3>
-                        </div>
-                        <div class="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-6 px-6" id="recommended-songs">
-                            <!-- Will be dynamically populated -->
-                        </div>
-                    </div>
-
-                    <!-- All Songs List -->
-                    <div class="mt-4">
-                        <h3 class="text-lg font-bold mb-4">All Songs</h3>
-                        <div class="space-y-3" id="all-songs-list">
-                            <!-- Will be dynamically populated -->
-                        </div>
-                    </div>
+                <div id="registerForm" style="display:none;">
+                    <div class="input-group"><label>Display name</label><input type="text" id="regName"
+                            placeholder="Swing User"></div>
+                    <div class="input-group"><label>Email</label><input type="email" id="regEmail"
+                            placeholder="your@email.com"></div>
+                    <div class="input-group"><label>Password</label><input type="password" id="regPassword"
+                            placeholder="min 6 chars"></div>
+                    <button class="btn btn-secondary" id="registerBtn">Register</button>
                 </div>
-
-                <!-- Search View (Hidden by default) -->
-                <div id="view-search" class="hidden page-enter">
-                    <h2 class="text-3xl font-bold mb-6">Discover</h2>
-                    <div class="glass-panel p-4 rounded-2xl flex items-center gap-3 mb-8 sticky top-0 z-20">
-                        <i class="ph ph-magnifying-glass text-xl text-white/50"></i>
-                        <input type="text" id="search-input" placeholder="Search songs, artists..." class="bg-transparent w-full outline-none text-white placeholder-white/30 font-medium">
-                    </div>
-                    <div class="space-y-3" id="search-results">
-                        <!-- Search results will appear here -->
-                    </div>
+                <div class="toggle-auth">
+                    <span id="toggleTxt">No account?</span> <button id="toggleAuthBtn">Register</button>
                 </div>
-
-                 <!-- Library View (Hidden by default) -->
-                 <div id="view-library" class="hidden page-enter">
-                    <h2 class="text-3xl font-bold mb-6">Your Library</h2>
-                    <div class="flex items-center gap-4 mb-6">
-                        <div class="w-16 h-16 bg-gradient-to-br from-primary to-emerald-800 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,255,102,0.3)]">
-                            <i class="ph-fill ph-heart text-2xl text-black"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-lg">Recently Played</h3>
-                            <p class="text-sm text-white/50" id="recent-count">0 tracks</p>
-                        </div>
-                    </div>
-                    <div class="space-y-2" id="recently-played-list">
-                        <!-- Recently played songs will appear here -->
-                        <div class="text-center py-8 text-white/40" id="no-recent-message">
-                            <i class="ph ph-music-notes text-4xl mb-2"></i>
-                            <p>No recently played songs</p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Navigation Bar -->
-            <nav class="absolute bottom-0 w-full h-[90px] bg-black/40 backdrop-blur-xl border-t border-white/10 z-30 flex justify-around items-start pt-4 pb-[env(safe-area-inset-bottom)]">
-                <button onclick="switchView('home')" class="nav-btn group flex flex-col items-center gap-1 w-16 text-primary">
-                    <i class="ph-fill ph-house text-2xl group-active:scale-90 transition-transform"></i>
-                    <span class="text-[10px] font-bold tracking-wide">Home</span>
-                </button>
-                <button onclick="switchView('search')" class="nav-btn group flex flex-col items-center gap-1 w-16 text-white/40 hover:text-white transition-colors">
-                    <i class="ph ph-magnifying-glass text-2xl group-active:scale-90 transition-transform"></i>
-                    <span class="text-[10px] font-bold tracking-wide">Search</span>
-                </button>
-                <button onclick="switchView('library')" class="nav-btn group flex flex-col items-center gap-1 w-16 text-white/40 hover:text-white transition-colors">
-                    <i class="ph ph-books text-2xl group-active:scale-90 transition-transform"></i>
-                    <span class="text-[10px] font-bold tracking-wide">Library</span>
-                </button>
-            </nav>
-
-            <!-- Mini Player (Floating) -->
-            <div id="mini-player" onclick="toggleFullPlayer(true)" class="absolute bottom-[96px] left-4 right-4 h-16 glass-panel rounded-2xl flex items-center p-2 pr-4 gap-3 shadow-[0_8px_32px_rgba(0,0,0,0.5)] z-40 transform translate-y-[200%] transition-transform duration-500 cursor-pointer overflow-hidden border border-white/10">
-                <div class="w-12 h-12 rounded-lg bg-gray-800 overflow-hidden relative shadow-lg">
-                     <img id="mini-art" src="" class="w-full h-full object-cover animate-[spin_10s_linear_infinite]">
-                     <div class="absolute inset-0 bg-black/10"></div>
-                </div>
-                <div class="flex-1 min-w-0 flex flex-col justify-center">
-                    <h4 id="mini-title" class="text-sm font-bold truncate">Song Title</h4>
-                    <p id="mini-artist" class="text-[10px] text-primary truncate uppercase tracking-wider">Artist</p>
-                </div>
-                <div class="flex items-center gap-4 z-10">
-                     <!-- Visualizer bars -->
-                     <div class="playing-wave hidden" id="mini-wave">
-                        <span></span><span></span><span></span><span></span>
-                    </div>
-                    <button id="mini-play-btn" onclick="event.stopPropagation(); togglePlay()" class="text-white hover:text-primary transition-colors">
-                        <i class="ph-fill ph-play text-2xl"></i>
-                    </button>
-                </div>
-                <!-- Progress Bar Background -->
-                <div class="absolute bottom-0 left-0 h-[2px] bg-white/10 w-full">
-                    <div id="mini-progress-bar" class="h-full bg-primary w-0 transition-[width] duration-100 ease-linear"></div>
-                </div>
-            </div>
-
-        </main>
-
-        <!-- Full Player Overlay -->
-        <div id="full-player" class="absolute inset-0 bg-[#0a0a0a]/95 backdrop-blur-3xl z-50 transform translate-y-[100%] transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) flex flex-col">
-            <!-- Background Blur Effect -->
-            <div class="absolute inset-0 z-0 overflow-hidden opacity-40">
-                <img id="blur-bg" src="" class="w-full h-full object-cover blur-[80px] scale-150">
-            </div>
-
-            <div class="relative z-10 flex flex-col h-full px-8 pb-8 pt-4">
-                <!-- Handle -->
-                <div class="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" onclick="toggleFullPlayer(false)"></div>
-
-                <!-- Header -->
-                <div class="flex justify-between items-center mb-8">
-                    <button onclick="toggleFullPlayer(false)" class="w-10 h-10 rounded-full glass-card flex items-center justify-center active:scale-95 transition-transform">
-                        <i class="ph ph-caret-down text-xl"></i>
-                    </button>
-                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">Now Playing</span>
-                    <button class="w-10 h-10 rounded-full glass-card flex items-center justify-center active:scale-95 transition-transform">
-                        <i class="ph ph-dots-three text-xl"></i>
-                    </button>
-                </div>
-
-                <!-- Album Art Area -->
-                <div class="flex-1 flex flex-col justify-center items-center relative mb-8">
-                    <div class="relative w-full max-w-[320px] aspect-square">
-                        <div class="album-shadow" id="album-glow"></div>
-                        <div class="w-full h-full rounded-3xl overflow-hidden shadow-[0_20px_50px_-10px_rgba(0,0,0,0.5)] border border-white/10">
-                            <img id="full-art" src="" class="w-full h-full object-cover">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Info -->
-                <div class="flex justify-between items-end mb-8">
-                    <div class="flex-1 mr-4">
-                        <h2 id="full-title" class="text-2xl font-bold leading-tight mb-1 line-clamp-1">Song Title</h2>
-                        <p id="full-artist" class="text-lg text-primary font-medium opacity-90 line-clamp-1">Artist Name</p>
-                    </div>
-                    <button id="like-btn" onclick="toggleLike()" class="mb-1 text-white/30 hover:text-red-500 active:scale-125 transition-all duration-300">
-                        <i class="ph-fill ph-heart text-3xl"></i>
-                    </button>
-                </div>
-
-                <!-- Scrubber -->
-                <div class="mb-8 group">
-                    <input type="range" id="seek-slider" min="0" max="100" value="0" class="w-full relative z-20">
-                    <div class="flex justify-between text-[10px] font-bold text-white/40 mt-2 font-mono tracking-widest">
-                        <span id="current-time">0:00</span>
-                        <span id="duration">0:00</span>
-                    </div>
-                </div>
-
-                <!-- Controls -->
-                <div class="flex items-center justify-between px-2 mb-8">
-                    <button id="shuffle-btn" class="text-white/40 hover:text-white transition-colors" onclick="toggleShuffle()">
-                        <i class="ph ph-shuffle text-2xl"></i>
-                    </button>
-                    
-                    <div class="flex items-center gap-6">
-                        <button class="text-white hover:text-primary transition-colors active:scale-90 transform" onclick="previousTrack()">
-                            <i class="ph-fill ph-skip-back text-3xl"></i>
-                        </button>
-                        
-                        <button onclick="togglePlay()" class="w-20 h-20 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[0_0_40px_rgba(255,255,255,0.2)]">
-                            <i id="main-play-icon" class="ph-fill ph-play text-4xl ml-1"></i>
-                        </button>
-                        
-                        <button class="text-white hover:text-primary transition-colors active:scale-90 transform" onclick="nextTrack()">
-                            <i class="ph-fill ph-skip-forward text-3xl"></i>
-                        </button>
-                    </div>
-
-                    <button id="loop-btn" class="text-white/40 hover:text-white transition-colors" onclick="toggleLoop()">
-                        <i class="ph ph-repeat text-2xl"></i>
-                    </button>
-                </div>
-                
-                <!-- Bottom Action -->
-                <div class="flex justify-center">
-                    <div class="glass-card px-4 py-2 rounded-full flex items-center gap-2 cursor-pointer hover:bg-white/10">
-                        <i class="ph ph-speaker-hifi text-primary"></i>
-                        <span class="text-xs font-bold text-white/60">AirPlay & Bluetooth</span>
-                    </div>
-                </div>
-
             </div>
         </div>
 
+        <!-- MAIN APP View -->
+        <div id="mainApp" class="main-app">
+            <div class="header">
+                <h1>Swing<span>.</span></h1>
+                <div class="header-actions">
+                    <div id="notifBell" class="bell-icon"><i class="fas fa-bell"></i><span id="notifBadge" class="badge"
+                            style="display:none;">0</span></div>
+                    <div class="user-icon" id="headerProfileIcon"><i class="fas fa-user-circle"></i></div>
+                </div>
+            </div>
+
+            <!-- dynamic content sections -->
+            <div class="content" id="contentArea">
+                <!-- home section (progress circles) -->
+                <div class="section active" id="homeSection">
+                    <div class="section-title">Today's protein</div>
+                    <div class="circle-card">
+                        <div class="progress-circle" id="proteinCircle"
+                            style="background: conic-gradient(#ff7b4a 0deg, #eef2f8 0deg);">
+                            <inner id="proteinText">0g</inner>
+                        </div>
+                        <div style="display:flex; gap:12px; justify-content:center; margin-top:16px;">
+                            <button class="btn" style="padding:10px 20px; width:auto; font-size: 0.9rem;"
+                                id="addProteinBtn">+20g</button>
+                            <button class="btn btn-secondary" style="padding:10px 20px; width:auto; font-size: 0.9rem;"
+                                id="setGoalBtn">Goal</button>
+                        </div>
+                        <div class="small-note" style="margin-top: 10px;" id="proteinTargetNote">Goal: 120g</div>
+                    </div>
+
+                    <div class="section-title">Consistency</div>
+                    <div class="grid-2">
+                        <div class="circle-card">
+                            <div class="progress-circle" id="weekCircle"
+                                style="background:conic-gradient(#ff7b4a 0deg 0deg, #eef2f8 0deg 360deg); height: 80px; width: 80px;">
+                                <inner style="width:65px; height:65px; font-size: 1.1rem;" id="weekPct">0%</inner>
+                            </div><span style="font-size: 0.8rem; font-weight: 600;">week</span>
+                        </div>
+                        <div class="circle-card">
+                            <div class="progress-circle" id="monthCircle"
+                                style="background:conic-gradient(#1e2b4f 0deg 0deg, #eef2f8 0deg 360deg); height: 80px; width: 80px;">
+                                <inner style="width:65px; height:65px; font-size: 1.1rem;" id="monthPct">0%</inner>
+                            </div><span style="font-size: 0.8rem; font-weight: 600;">month</span>
+                        </div>
+                    </div>
+
+                    <div class="section-title">Manual Diet Entry</div>
+                    <div
+                        style="background:white; border-radius:28px; padding:18px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                        <div class="input-group"><label>Quick Add Calories</label><input type="number" id="quickCal"
+                                placeholder="e.g. 500" style="padding: 12px 18px;"></div>
+                        <button class="btn" style="padding:12px;" id="saveQuickAdd">Sync Daily Goal</button>
+                    </div>
+                </div>
+
+                <!-- calendar section -->
+                <div class="section" id="calendarSection">
+                    <div class="section-title" id="calMonthTitle">March 2025</div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                    <div class="small-note">Tap day to mark protein goal ✓</div>
+                    <div
+                        style="margin-top:20px; background:white; border-radius:28px; padding:20px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                        <div style="margin-bottom: 10px; font-weight: 600;">Month Streak <span
+                                style="float:right; color:#1e2b4f;" id="monthStreakVal">0%</span></div>
+                        <div style="width:100%; height:8px; background:#f0f4fe; border-radius:10px; overflow:hidden;">
+                            <div id="monthBar" style="width:0%; height:100%; background:#ff7b4a; transition: 1s;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- leaderboard section -->
+                <div class="section" id="leaderboardSection">
+                    <div class="section-title">🏆 consistency leaderboard</div>
+                    <div id="leaderboardList"></div>
+                    <div class="section-title">🔍 search people</div>
+                    <div class="search-box"><input placeholder="username..." id="searchPeopleInput"><button
+                            id="searchPeopleBtn"><i class="fas fa-search"></i></button></div>
+                    <div id="searchResults"></div>
+                </div>
+
+                <!-- chat section -->
+                <div class="section" id="chatSection">
+                    <div style="display:flex; gap:10px; margin-bottom:15px;">
+                        <button class="btn" style="padding:10px; flex:1; font-size: 0.9rem;" id="showPublicChat">💬
+                            public lounge</button>
+                        <button class="btn btn-secondary" style="padding:10px; flex:1; font-size: 0.9rem;"
+                            id="showPrivateChat">🔐 private chats</button>
+                    </div>
+                    <div id="publicChatPanel">
+                        <div class="chat-container">
+                            <div class="chat-messages" id="publicMessages"></div>
+                            <div class="chat-footer"><input id="publicMsgInput" placeholder="Write something..."><button
+                                    class="send-btn" id="sendPublicBtn"><i class="fas fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="privateChatPanel" style="display:none;">
+                        <div id="privateList"></div>
+                        <div id="chatInterface" style="display:none;">
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;"><button
+                                    class="btn" style="width:40px; height:40px; padding:0;" id="backToPrivateList"><i
+                                        class="fas fa-arrow-left"></i></button>
+                                <h4 id="activeChatName">Chatting...</h4>
+                            </div>
+                            <div class="chat-container">
+                                <div class="chat-messages" id="privateMessages"></div>
+                                <div class="chat-footer"><input id="privateMsgInput"
+                                        placeholder="Private msg..."><button class="send-btn" id="sendPrivateBtn"><i
+                                            class="fas fa-paper-plane"></i></button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- food search section -->
+                <div class="section" id="foodSection">
+                    <div class="section-title">🍏 Kerala & world foods</div>
+                    <div class="search-box"><input id="foodSearchInput" placeholder="e.g. alfam, mandhi, egg"><button
+                            id="foodSearchBtn"><i class="fas fa-search"></i></button></div>
+                    <div id="foodResults"></div>
+                </div>
+
+                <!-- settings section -->
+                <div class="section" id="settingsSection">
+                    <div class="section-title">⚙️ profile setup</div>
+                    <div class="settings-option"><span>Display Name</span>
+                        <div class="settings-val" id="editNameBtn"><span id="displayNameSetting">Swing User</span> <i
+                                class="fas fa-chevron-right"></i></div>
+                    </div>
+                    <div class="settings-option"><span>Daily Protein (g)</span>
+                        <div class="settings-val" id="editProteinBtn"><span id="proteinGoalSetting">120g</span> <i
+                                class="fas fa-chevron-right"></i></div>
+                    </div>
+                    <div class="settings-option"><span>Notifications</span> <i class="fas fa-toggle-on"
+                            style="color:#ff7b4a; font-size:1.8rem;"></i></div>
+                    <button class="btn" id="logoutBtn" style="background:#ff7b4a; margin-top: 20px;">Log out</button>
+                </div>
+
+                <!-- Notifications section -->
+                <div class="section" id="notificationsSection">
+                    <div class="section-title">🔔 Notifications</div>
+                    <div id="notificationList">
+                        <div class="small-note">No new notifications.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div class="bottom-nav">
+                <div class="nav-item active" data-section="homeSection"><i class="fas fa-home"></i><span>Home</span>
+                </div>
+                <div class="nav-item" data-section="calendarSection"><i
+                        class="fas fa-calendar-alt"></i><span>History</span></div>
+                <div class="nav-item" data-section="leaderboardSection"><i class="fas fa-trophy"></i><span>Ranks</span>
+                </div>
+                <div class="nav-item" data-section="chatSection"><i class="fas fa-comment-dots"></i><span>Social</span>
+                </div>
+                <div class="nav-item" data-section="foodSection"><i class="fas fa-utensils"></i><span>Food</span></div>
+                <div class="nav-item" data-section="settingsSection"><i class="fas fa-sliders-h"></i><span>More</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- GOAL MODAL -->
+        <div class="modal" id="goalModal">
+            <div class="modal-card">
+                <h3 style="margin-bottom: 20px; color:#1e2b4f;">Update Protein Goal</h3>
+                <div class="input-group"><label>Goal in grams</label><input type="number" id="newGoalInput"
+                        placeholder="120"></div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn" style="flex:1;" id="saveGoalBtn">Save</button>
+                    <button class="btn btn-secondary" style="flex:1; background:#8a99b5;"
+                        id="closeGoalModal">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- NAME MODAL -->
+        <div class="modal" id="nameModal">
+            <div class="modal-card">
+                <h3 style="margin-bottom: 20px; color:#1e2b4f;">Edit Name</h3>
+                <div class="input-group"><label>Display Name</label><input type="text" id="newNameInput"
+                        placeholder="Username"></div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn" style="flex:1;" id="saveNameBtn">Save</button>
+                    <button class="btn btn-secondary" style="flex:1; background:#8a99b5;"
+                        id="closeNameModal">Cancel</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // --- Data ---
-        const defaultPlaylist = [
-            // Golden Brown (kept as one international track)
-            {
-                title: "Golden Brown",
-                artist: "The Stranglers",
-                src: "https://files.catbox.moe/5oidq1.m4a",
-                cover: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1000",
-                genre: "international"
-            },
-            // Push The Feeling On
-            {
-                title: "Push The Feeling On",
-                artist: "Nightcrawlers",
-                src: "https://files.catbox.moe/h0h4nm.mp3",
-                cover: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=1000",
-                genre: "electronic"
-            },
-            // Malayalam songs with genres
-            {
-                title: "Chirimanimulle",
-                artist: "Malayalam Folk Song",
-                src: "https://files.catbox.moe/5j04ex.m4a",
-                cover: "https://imgs.search.brave.com/QrrIH-kCQu0X5tla9-b51gm30F0kERHXScmq6Fd-sBw/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9R/c3l6aTg5SDlqQS9t/cWRlZmF1bHQuanBn",
-                genre: "malayalam-folk"
-            },
-            {
-                title: "Sudari Onnu Parayu",
-                artist: "Malayalam Romantic",
-                src: "https://files.catbox.moe/r5ouoy.m4a",
-                cover: "https://imgs.search.brave.com/RxY-4lgBVtIGQQIMgHClZNp4WiBbPir0G9k18Oc7DNU/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9seXJp/Y3NyYWFnLmNvbS93/cC1jb250ZW50L3Vw/bG9hZHMvMjAyNS8x/Mi9zdW5kYXJpLW9u/bnUtcGFyYXl1LWxp/b24tdHJhbnNsYXRp/b24ud2VicA",
-                genre: "malayalam-romantic"
-            },
-            {
-                title: "Ariyathe Ariyathe",
-                artist: "Malayalam Melody",
-                src: "https://files.catbox.moe/thgeui.m4a",
-                cover: "https://imgs.search.brave.com/IGPMbpWWn3oPkeL_g0KpecHT51aHzTBDAVx9Z7DWG7s/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9k/aWtDOFVteHhuRS9t/YXhyZXNkZWZhdWx0/LmpwZw",
-                genre: "malayalam-melody"
-            },
-            {
-                title: "Pathinalam Ravinte",
-                artist: "Malayalam Classic",
-                src: "https://files.catbox.moe/c99hv2.m4a",
-                cover: "https://imgs.search.brave.com/uvTaC8enpU4gCDqSmrdp98pr0LjLMZum8AA9vCBHQDE/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9hbGxp/bmRpYWthcmFva2Vz/LmNvbS9tZWRpYS9j/YXRhbG9nL3Byb2R1/Y3QvY2FjaGUvODc3/ODE4MTMxYTg0MmUz/MGE2YWUwN2NkNzZm/OTM1ZGQvcy9oL3No/YXJqYS10by1zaGFy/amEtbWFsYXlhbGFt/LTIwMTktMjAxOTA5/MTkwMDM0MDgtNTAw/eDUwMF9jbGVhbnVw/XzEuanBn",
-                genre: "malayalam-classic"
-            },
-            {
-                title: "Vaisakha Sandhye",
-                artist: "Malayalam Classic",
-                src: "https://files.catbox.moe/1b4p39.m4a",
-                cover: "https://imgs.search.brave.com/0NuxsBMtEqfxIJQ_nzj4U7lR0VkReeOcwbuMA_VbGxU/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jLnNh/YXZuY2RuLmNvbS8z/MjkvTmFkb2RpLUth/dHR1LU1hbGF5YWxh/bS0xOTg3LTIwMjQw/ODMwMDYyODI5LTUw/MHg1MDAuanBn",
-                genre: "malayalam-classic"
-            },
-            {
-                title: "Avani Ponnunjal Aadikam",
-                artist: "Malayalam Melody",
-                src: "https://files.catbox.moe/k7uaq8.m4a",
-                cover: "https://imgs.search.brave.com/Ht0uyOzUWQ8uYBtQJXT1Amxb78oJiXwZpp54mbrb9PU/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9wYWdh/bGx3b3JsZHMuY29t/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDIz/LzA2L0FhdmFuaS1Q/b25udW5qYWwuanBn",
-                genre: "malayalam-melody"
-            },
-            {
-                title: "Oru Rathri Koodi",
-                artist: "Malayalam Romantic",
-                src: "https://files.catbox.moe/qlputt.m4a",
-                cover: "https://imgs.search.brave.com/YGftVD4TAkktFAdOoiie4y6VLBQJMs9oE3jH3WEtZTs/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9seXJp/Y3NyYWFnLmNvbS93/cC1jb250ZW50L3Vw/bG9hZHMvMjAyMC8w/Mi9vcnUtcmF0aHJp/LWtvb2RpLWx5cmlj/cy1pbi1lbmdsaXNo/LmpwZw",
-                genre: "malayalam-romantic"
-            },
-            {
-                title: "Thanka Manasu",
-                artist: "Malayalam Melody",
-                src: "https://files.catbox.moe/3p2geo.m4a",
-                cover: "https://imgs.search.brave.com/n-lte4NKG9_-x1-zW0nHFT6U0Brr2Aovb_aX2kFHXro/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9J/dHVmdEhObFM4by9t/cWRlZmF1bHQuanBn",
-                genre: "malayalam-melody"
-            },
-            {
-                title: "Eeran Megham Poovum Kondu",
-                artist: "Malayalam Classic",
-                src: "https://files.catbox.moe/u3qta3.m4a",
-                cover: "https://imgs.search.brave.com/N4GRzIzh82R_WP7Y7fgsz2BGcvYYHDBPOMjA0OI1yX4/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS8x/VHVFaklhUUZaYy9t/YXhyZXNkZWZhdWx0/LmpwZw",
-                genre: "malayalam-classic"
-            },
-            {
-                title: "Oru Chenbaneer",
-                artist: "Malayalam Folk",
-                src: "https://files.catbox.moe/no3385.m4a",
-                cover: "https://imgs.search.brave.com/CMd7AdROO5oIjpg5rsQHHDB_vD6_KMKdIGzPSkhHRDI/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9hbGxp/bmRpYWthcmFva2Vz/LmNvbS9tZWRpYS9j/YXRhbG9nL3Byb2R1/Y3QvY2FjaGUvODc3/ODE4MTMxYTg0MmUz/MGE2YWUwN2NkNzZm/OTM1ZGQvcy90L3N0/aGlkaGktbWFsYXlh/bGFtLTIwMS5qcGc",
-                genre: "malayalam-folk"
-            },
-            {
-                title: "Unarumee Gaanam",
-                artist: "Malayalam Melody",
-                src: "https://files.catbox.moe/8z3hf6.m4a",
-                cover: "https://imgs.search.brave.com/U5cSBc0KTUZJXogEW9hY4b29TxFw0MFMqivLmq2L9dk/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9s/NWJhNHdNLUJBTS9t/YXhyZXNkZWZhdWx0/LmpwZw",
-                genre: "malayalam-melody"
-            },
-            {
-                title: "Sreeraagamo Thedunnu",
-                artist: "Malayalam Devotional",
-                src: "https://files.catbox.moe/e8d82z.m4a",
-                cover: "https://imgs.search.brave.com/gbOxCGB12FTtmRjMy2ddjtfoi3lE99HvFU8UvhswgBs/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jLnNh/YXZuY2RuLmNvbS8z/NjcvU3JlZXJhZ2Ft/by1UaGVkdW5udS1O/ZWUtQ292ZXItVmVy/c2lvbi1NYWxheWFs/YW0tMjAyNS0yMDI1/MDcwMzE4NTcxMy01/MDB4NTAwLmpwZw",
-                genre: "malayalam-devotional"
-            },
-            {
-                title: "Karukare Karuthoru",
-                artist: "Malayalam Classic",
-                src: "https://files.catbox.moe/bmrdzy.m4a",
-                cover: "https://imgs.search.brave.com/NPPrJiH_Kv59zV-2bmY9WbyvMl0g_gkSgXN7TmnXO8k/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9hbGxp/bmRpYWthcmFva2Vz/LmNvbS9tZWRpYS9j/YXRhbG9nL3Byb2R1/Y3QvY2FjaGUvODc3/ODE4MTMxYTg0MmUz/MGE2YWUwN2NkNzZm/OTM1ZGQvYi9hL2Jh/bGV0dGFuLW1hbGF5/YWxhbS0yMDAzLTUw/MHg1MDBfMi5qcGc",
-                genre: "malayalam-classic"
-            },
-            {
-                title: "Anthiponvettam",
-                artist: "Malayalam Classic",
-                src: "https://files.catbox.moe/h545er.m4a",
-                cover: "https://imgs.search.brave.com/TlK0ctG4RrHzpjWjGxP7d_9ktICKVLqon2zMmxVppEM/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9jLnNh/YXZuY2RuLmNvbS8z/NDUvVmFuZGhhbmFt/LU1hbGF5YWxhbS0x/OTk1LTIwMTkwMTEw/MDUyNjA4LTUwMHg1/MDAuanBn",
-                genre: "malayalam-classic"
-            },
-            {
-                title: "Koottil Ninnum",
-                artist: "Malayalam Devotional",
-                src: "https://files.catbox.moe/iehzkz.m4a",
-                cover: "https://imgs.search.brave.com/wzTGAmmin-31PF50NHHms2Hh1J4Qz3DK_6eSd1tpSLg/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9wZW5k/dWphdHQuY29tLnNl/L3VwbG9hZHMvYWxi/dW0vdGhhbGF2YXR0/b20tcmVnaHVrdW1h/ci53ZWJw",
-                genre: "malayalam-devotional"
-            }
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAHrBE3doAhDni4mcNhylJD8o3r5cNZYSI",
+            authDomain: "ls-mannage.firebaseapp.com",
+            databaseURL: "https://ls-mannage-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "ls-mannage",
+            storageBucket: "ls-mannage.firebasestorage.app",
+            messagingSenderId: "115534926798",
+            appId: "1:115534926798:web:4ea3ab3c1a2d44e2e1d19f",
+            measurementId: "G-P2JQH8M41Y"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // State
+        let currentUser = null;
+        let currentProfile = null;
+        let activeSection = 'homeSection';
+        let proteinToday = 0;
+        let currentTarget = 120;
+        let activePrivateChatUid = null;
+        let unreadNotifications = 0;
+
+        // Food Database (Expanded with Manglish/Malayalam support)
+        const foodDB = [
+            // SADYA & TRADITIONAL VEGETARIAN DISHES
+            { name: "Kaalan (കാളൻ)", kcal: 120, protein: 3, cat: "Sadhya", alt: "kalan" },
+            { name: "Pachadi - Pineapple/Beetroot (പച്ചടി)", kcal: 140, protein: 2, cat: "Sadhya", alt: "pachadi" },
+            { name: "Kichadi (കിച്ചടി)", kcal: 130, protein: 2, cat: "Sadhya", alt: "kichadi" },
+            { name: "Parippu Curry (പരിപ്പ് കറി)", kcal: 150, protein: 8, cat: "Sadhya", alt: "parippu" },
+            { name: "Cherupayar Curry (ചെറുപയർ കറി)", kcal: 160, protein: 9, cat: "Sadhya", alt: "cherupayar" },
+            { name: "Mambazha Pulissery (മാമ്പഴ പുളിശ്ശേരി)", kcal: 110, protein: 2, cat: "Sadhya", alt: "pulissery" },
+            { name: "Naranga Curry (നാരങ്ങ കറി)", kcal: 90, protein: 1, cat: "Sadhya", alt: "naranga pickle" },
+            { name: "Manga Curry (മാങ്ങ കറി)", kcal: 95, protein: 1, cat: "Sadhya", alt: "manga pickle" },
+            { name: "Cabbage Thoran (കാബേജ് തോരൻ)", kcal: 95, protein: 3, cat: "Sadhya", alt: "thoran" },
+            { name: "Beetroot Thoran (ബീറ്റ്റൂട്ട് തോരൻ)", kcal: 100, protein: 2, cat: "Sadhya", alt: "thoran" },
+            { name: "Vendakka Mezhukkupuratti (വെണ്ടയ്ക്ക മെഴുക്കുപുരട്ടി)", kcal: 85, protein: 2, cat: "Side", alt: "vendakka" },
+            { name: "Kovakka Fry (കോവയ്ക്ക ഫ്രൈ)", kcal: 90, protein: 2, cat: "Side", alt: "kovakka" },
+            { name: "Pavakka Fry (പാവയ്ക്ക ഫ്രൈ)", kcal: 110, protein: 2, cat: "Side", alt: "pavakka" },
+            { name: "Urula Kizhangu Roast (ഉരുളക്കിഴങ്ങ് റോസ്റ്റ്)", kcal: 150, protein: 3, cat: "Side", alt: "potato roast" },
+            { name: "Puli Inji (പുളി ഇഞ്ചി)", kcal: 130, protein: 1, cat: "Sadhya", alt: "inji curry" },
+            { name: "Upperi - Sharkkara Varatti (ഉപ്പേരി)", kcal: 480, protein: 2, cat: "Snack", alt: "upperi sharkara" },
+            { name: "Papadam (പപ്പടം)", kcal: 512, protein: 25, cat: "Sadhya", alt: "pappadam" },
+
+            // FISH & SEAFOOD
+            { name: "Mathi Fry - Sardine (മത്തി ഫ്രൈ)", kcal: 200, protein: 22, cat: "Fish", alt: "mathi" },
+            { name: "Ayala Fry - Mackerel (അയല ഫ്രൈ)", kcal: 220, protein: 21, cat: "Fish", alt: "ayala" },
+            { name: "Neymeen Fry - Seer Fish (നെയ്മീൻ ഫ്രൈ)", kcal: 240, protein: 23, cat: "Fish", alt: "neymeen" },
+            { name: "Kanava Roast - Squid (കണവ റോസ്റ്റ്)", kcal: 175, protein: 18, cat: "Seafood", alt: "kanava" },
+            { name: "Chemmeen Theeyal (ചെമ്മീൻ തീയൽ)", kcal: 160, protein: 17, cat: "Seafood", alt: "chemmeen" },
+            { name: "Crab Masala (ഞണ്ട് മസാല)", kcal: 190, protein: 18, cat: "Seafood", alt: "crab nhandu" },
+            { name: "Dry Fish Chammanthi (ഉണക്കമീൻ ചമ്മന്തി)", kcal: 250, protein: 30, cat: "Fish", alt: "unakkameen" },
+            { name: "Meen Peera (മീൻ പീര)", kcal: 150, protein: 16, cat: "Fish", alt: "peera" },
+            { name: "Fish Cutlet (ഫിഷ് കട്ട്ലറ്റ്)", kcal: 260, protein: 14, cat: "Fish", alt: "cutlet" },
+
+            // CHICKEN DISHES
+            { name: "Chicken Varutharachathu (ചിക്കൻ വറുത്തരച്ചത്)", kcal: 240, protein: 22, cat: "Chicken", alt: "chicken curry" },
+            { name: "Chicken Chukka (ചിക്കൻ ചുക്ക)", kcal: 230, protein: 21, cat: "Chicken", alt: "chukka" },
+            { name: "Chicken Kondattam (ചിക്കൻ കൊണ്ടാട്ടം)", kcal: 260, protein: 20, cat: "Chicken", alt: "kondattam" },
+            { name: "Chicken 65 Kerala Style (ചിക്കൻ 65)", kcal: 300, protein: 23, cat: "Chicken", alt: "65" },
+            { name: "Chicken Cutlet (ചിക്കൻ കട്ട്ലറ്റ്)", kcal: 280, protein: 15, cat: "Chicken", alt: "cutlet" },
+            { name: "Chicken Puffs (ചിക്കൻ പഫ്സ്)", kcal: 320, protein: 9, cat: "Bakery", alt: "puff" },
+            { name: "Chicken Kizhi Parotta (കിഴി പൊറോട്ട)", kcal: 350, protein: 18, cat: "Main", alt: "kizhi" },
+
+            // BEEF / PORK / MUTTON
+            { name: "Beef Chilli (ബീഫ് ചില്ലി)", kcal: 290, protein: 25, cat: "Beef", alt: "beef" },
+            { name: "Beef Fry Coconut Style (ബീഫ് ഫ്രൈ)", kcal: 320, protein: 27, cat: "Beef", alt: "beef olathiyathu bdf" },
+            { name: "Beef Cutlet (ബീഫ് കട്ട്ലറ്റ്)", kcal: 300, protein: 16, cat: "Beef", alt: "cutlet" },
+            { name: "Pork Vindaloo (പോർക്ക് വിന്താലു)", kcal: 310, protein: 26, cat: "Pork", alt: "pork" },
+            { name: "Pork Roast (പോർക്ക് റോസ്റ്റ്)", kcal: 330, protein: 28, cat: "Pork", alt: "pork" },
+            { name: "Mutton Chaps (മട്ടൻ ചാപ്സ്)", kcal: 300, protein: 25, cat: "Mutton", alt: "mutton" },
+            { name: "Mutton Stew (മട്ടൻ സ്റ്റ്യൂ)", kcal: 240, protein: 23, cat: "Mutton", alt: "stew" },
+
+            // MALABAR SPECIALS
+            { name: "Coin Porotta (കോയിൻ പൊറോട്ട)", kcal: 320, protein: 6, cat: "Bread", alt: "porotta" },
+            { name: "Kothu Porotta (കൊത്തു പൊറോട്ട)", kcal: 350, protein: 12, cat: "Main", alt: "kothu" },
+            { name: "Meen Pathiri (മീൻ പത്തിരി)", kcal: 290, protein: 14, cat: "Malabar", alt: "pathiri" },
+            { name: "Chicken Al Faham (അൽ ഫഹം)", kcal: 220, protein: 25, cat: "Malabar", alt: "alfaham farooj" },
+            { name: "Mandhi (മന്തി)", kcal: 210, protein: 18, cat: "Malabar", alt: "kuzhimanthi mandhi" },
+            { name: "Mutta Thengapal (മുട്ട തേങ്ങാപ്പാൽ)", kcal: 240, protein: 7, cat: "Malabar", alt: "egg curry" },
+            { name: "Ottada (ഓട്ടട)", kcal: 200, protein: 4, cat: "Malabar", alt: "ada" },
+
+            // TRIBAL & RURAL
+            { name: "Ragi Mudde (രാഗി മുദ്ദ)", kcal: 180, protein: 5, cat: "Tribal", alt: "ragi" },
+            { name: "Kambu Porridge (കമ്പ് കഞ്ഞി)", kcal: 150, protein: 4, cat: "Tribal", alt: "kanji" },
+            { name: "Bamboo Shoot Curry (മുളങ്കമ്പ് കറി)", kcal: 90, protein: 2, cat: "Tribal", alt: "mulamkambu" },
+            { name: "Wild Boar Curry (കാട്ടുപന്നി കറി)", kcal: 250, protein: 24, cat: "Tribal", alt: "panni curry" },
+            { name: "Tapioca Leaf Curry (ചീനി ഇല കറി)", kcal: 100, protein: 3, cat: "Tribal", alt: "kappa ila" },
+
+            // BREADS & RICE
+            { name: "Ghee Rice (നെയ്‌ചോറ്)", kcal: 210, protein: 4, cat: "Rice", alt: "neychoru" },
+            { name: "Jeerakasala Rice (ജീരകശാല അരി)", kcal: 130, protein: 3, cat: "Rice", alt: "kaima biriyani rice" },
+            { name: "Lemon Rice Kerala Style (നാരങ്ങ ചോറ്)", kcal: 180, protein: 4, cat: "Rice", alt: "naranga choru" },
+            { name: "Tamarind Rice (പുളിഞ്ചോറ്)", kcal: 200, protein: 5, cat: "Rice", alt: "pulinchoru" },
+            { name: "Coconut Rice (തേങ്ങ ചോറ്)", kcal: 220, protein: 4, cat: "Rice", alt: "thenga choru" },
+            { name: "Wheat Dosa (ഗോതമ്പ് ദോശ)", kcal: 170, protein: 5, cat: "Bread", alt: "gothambu dosa" },
+            { name: "Ragi Dosa (രാഗി ദോശ)", kcal: 160, protein: 4, cat: "Bread", alt: "ragi dosa" },
+            { name: "Chapati (ചപ്പാത്തി)", kcal: 120, protein: 3, cat: "Bread", alt: "chappathi" },
+
+            // STREET FOOD
+            { name: "Kerala Shawarma (ഷവർമ)", kcal: 250, protein: 15, cat: "Street", alt: "shawarma" },
+            { name: "Egg Puffs (മുട്ട പഫ്സ്)", kcal: 300, protein: 8, cat: "Bakery", alt: "puff" },
+            { name: "Veg Cutlet (വെജ് കട്ട്ലറ്റ്)", kcal: 240, protein: 5, cat: "Street", alt: "cutlet" },
+            { name: "Samosa Kerala Style (സമോസ)", kcal: 300, protein: 6, cat: "Street", alt: "samosa" },
+            { name: "Bonda (ബോണ്ട)", kcal: 280, protein: 4, cat: "Street", alt: "bonda" },
+            { name: "Pazham Nirachathu (പഴം നിറച്ചത്)", kcal: 310, protein: 3, cat: "Street", alt: "pazham" },
+
+            // PAYASAM VARIETY
+            { name: "Gothambu Payasam (ഗോതമ്പ് പായസം)", kcal: 260, protein: 6, cat: "Dessert", alt: "payasam" },
+            { name: "Aval Payasam (അവൽ പായസം)", kcal: 240, protein: 5, cat: "Dessert", alt: "payasam" },
+            { name: "Carrot Payasam (കാരറ്റ് പായസം)", kcal: 220, protein: 4, cat: "Dessert", alt: "payasam" },
+            { name: "Rice Payasam (അരി പായസം)", kcal: 230, protein: 4, cat: "Dessert", alt: "payasam" },
+            { name: "Paneer Payasam (പനീർ പായസം)", kcal: 300, protein: 10, cat: "Dessert", alt: "payasam" },
+            { name: "Palada Payasam (പാലട പായസം)", kcal: 350, protein: 6, cat: "Dessert", alt: "palada" },
+
+            // MORE SWEETS
+            { name: "Ela Ada (ഇല അട)", kcal: 230, protein: 4, cat: "Snack", alt: "ada" },
+            { name: "Chatti Pathiri Sweet (ചട്ടിപ്പത്തിരി)", kcal: 350, protein: 9, cat: "Malabar", alt: "pathiri" },
+            { name: "Kozhikodan Banana Halwa (ഹൽവ)", kcal: 390, protein: 2, cat: "Sweet", alt: "halwa alpaisa" },
+            { name: "Coconut Barfi (തേങ്ങ ബർഫി)", kcal: 450, protein: 4, cat: "Sweet", alt: "barfi" },
+            { name: "Milk Cake Kerala (മിൽക്ക് കേക്ക്)", kcal: 370, protein: 8, cat: "Sweet", alt: "cake" },
+            { name: "Jaggery Laddu (ലഡു)", kcal: 380, protein: 6, cat: "Sweet", alt: "laddu laddoo" },
+
+            // PICKLES & SIDES
+            { name: "Mango Pickle (മാങ്ങ അച്ചാർ)", kcal: 120, protein: 1, cat: "Pickle", alt: "manga achar" },
+            { name: "Lemon Pickle (നാരങ്ങ അച്ചാർ)", kcal: 100, protein: 1, cat: "Pickle", alt: "naranga achar" },
+            { name: "Fish Pickle (മീൻ അച്ചാർ)", kcal: 220, protein: 15, cat: "Pickle", alt: "meen achar" },
+            { name: "Prawn Pickle (ചെമ്മീൻ അച്ചാർ)", kcal: 230, protein: 18, cat: "Pickle", alt: "chemmeen achar" },
+            { name: "Chammanthi Podi (ചമ്മന്തി പൊടി)", kcal: 400, protein: 12, cat: "Side", alt: "podi" },
+            { name: "Coconut Chutney (തേങ്ങ ചമ്മന്തി)", kcal: 200, protein: 3, cat: "Side", alt: "chammanthi" },
+            // Gym
+            { name: "Chicken Breast (100g)", cal: 165, protein: 31, cat: "Gym" },
+            { name: "Egg Whites (5)", cal: 85, protein: 20, cat: "Gym" },
+            { name: "Whole Egg (1)", cal: 70, protein: 6, cat: "Gym" },
+            { name: "Oats (100g)", cal: 389, protein: 17, cat: "Gym" },
+            { name: "Peanut Butter (1 tbsp)", cal: 95, protein: 4, cat: "Gym" },
+            { name: "Whey Protein (1 scoop)", cal: 120, protein: 25, cat: "Gym" }
         ];
 
-        // App State - Load from localStorage or use defaults
-        let playlist = JSON.parse(localStorage.getItem('malayalamMelody_playlist')) || defaultPlaylist;
-        let recentlyPlayed = JSON.parse(localStorage.getItem('malayalamMelody_recentlyPlayed')) || [];
-        let playCounts = JSON.parse(localStorage.getItem('malayalamMelody_playCounts')) || {};
-        let genrePreferences = JSON.parse(localStorage.getItem('malayalamMelody_genrePreferences')) || {};
-        
-        let currentIndex = 0;
-        let isPlaying = false;
-        let isLiked = false;
-        let isLooping = false;
-        let isShuffled = false;
-        let shuffleHistory = [];
-        let currentGenre = null;
+        // UI Handlers
+        const $ = id => document.getElementById(id);
 
-        // --- Elements ---
-        const audio = document.getElementById('audio-engine');
-        const miniPlayer = document.getElementById('mini-player');
-        const fullPlayer = document.getElementById('full-player');
-        const loader = document.getElementById('loader');
-        const searchInput = document.getElementById('search-input');
-        const searchResults = document.getElementById('search-results');
-        const recommendedSongs = document.getElementById('recommended-songs');
-        const allSongsList = document.getElementById('all-songs-list');
-        const recentlyPlayedList = document.getElementById('recently-played-list');
-        const noRecentMessage = document.getElementById('no-recent-message');
-        const recentCount = document.getElementById('recent-count');
-        
-        // UI Elements
-        const els = {
-            miniTitle: document.getElementById('mini-title'),
-            miniArtist: document.getElementById('mini-artist'),
-            miniArt: document.getElementById('mini-art'),
-            miniPlayBtn: document.getElementById('mini-play-btn'),
-            miniProgress: document.getElementById('mini-progress-bar'),
-            miniWave: document.getElementById('mini-wave'),
-            
-            fullTitle: document.getElementById('full-title'),
-            fullArtist: document.getElementById('full-artist'),
-            fullArt: document.getElementById('full-art'),
-            blurBg: document.getElementById('blur-bg'),
-            mainPlayIcon: document.getElementById('main-play-icon'),
-            albumGlow: document.getElementById('album-glow'),
-            
-            seek: document.getElementById('seek-slider'),
-            currTime: document.getElementById('current-time'),
-            durTime: document.getElementById('duration'),
-            likeBtn: document.getElementById('like-btn'),
-            loopBtn: document.getElementById('loop-btn'),
-            shuffleBtn: document.getElementById('shuffle-btn')
+        // Toggle Login/Register
+        $('toggleAuthBtn').onclick = () => {
+            const isLogin = $('loginForm').style.display !== 'none';
+            $('loginForm').style.display = isLogin ? 'none' : 'block';
+            $('registerForm').style.display = isLogin ? 'block' : 'none';
+            $('toggleAuthBtn').innerText = isLogin ? 'Login' : 'Register';
+            $('toggleTxt').innerText = isLogin ? 'Already have account?' : 'No account?';
         };
 
-        // --- Initialization ---
-        window.onload = () => {
-            setTimeout(() => {
-                loader.style.opacity = '0';
-                setTimeout(() => loader.remove(), 700);
-            }, 1500);
-            
-            // Initialize UI
-            populateAllSongsList();
-            updateRecentlyPlayedDisplay();
-            updateGenreRecommendations();
-            
-            // Load first track
-            loadTrack(0, false); // Don't autoplay on initial load
-            
-            // Setup search functionality
-            setupSearch();
+        // Login
+        $('loginBtn').onclick = () => {
+            const email = $('loginEmail').value, pass = $('loginPassword').value;
+            auth.signInWithEmailAndPassword(email, pass).catch(err => alert(err.message));
         };
 
-        // --- Local Storage Functions ---
-        function saveToLocalStorage() {
-            localStorage.setItem('malayalamMelody_playlist', JSON.stringify(playlist));
-            localStorage.setItem('malayalamMelody_recentlyPlayed', JSON.stringify(recentlyPlayed));
-            localStorage.setItem('malayalamMelody_playCounts', JSON.stringify(playCounts));
-            localStorage.setItem('malayalamMelody_genrePreferences', JSON.stringify(genrePreferences));
-        }
+        // Register
+        $('registerBtn').onclick = () => {
+            const name = $('regName').value, email = $('regEmail').value, pass = $('regPassword').value;
+            auth.createUserWithEmailAndPassword(email, pass).then(cred => {
+                const uid = cred.user.uid;
+                db.ref('users/' + uid).set({ username: name, email, proteinGoal: 120, consistency: 0, points: 0 });
+            }).catch(err => alert(err.message));
+        };
 
-        function updatePlayCount(genre) {
-            if (!genre) return;
-            
-            if (!playCounts[genre]) {
-                playCounts[genre] = 0;
-            }
-            playCounts[genre]++;
-            
-            // Update genre preferences
-            if (!genrePreferences[genre]) {
-                genrePreferences[genre] = 0;
-            }
-            genrePreferences[genre] += 1;
-            
-            saveToLocalStorage();
-        }
-
-        // --- UI Population Functions ---
-        function populateAllSongsList() {
-            allSongsList.innerHTML = '';
-            
-            playlist.forEach((track, index) => {
-                const listItem = createSongListItem(track, index);
-                allSongsList.appendChild(listItem);
-            });
-        }
-
-        function createSongListItem(track, index) {
-            const listItem = document.createElement('div');
-            listItem.className = 'glass-card p-3 rounded-xl flex items-center gap-4 cursor-pointer hover:bg-white/5';
-            listItem.onclick = () => playTrack(index);
-            listItem.innerHTML = `
-                <span class="text-white/30 text-xs font-bold w-4">${(index + 1).toString().padStart(2, '0')}</span>
-                <img src="${track.cover}" class="w-12 h-12 rounded-lg object-cover">
-                <div class="flex-1">
-                    <h4 class="font-bold text-sm">${track.title}</h4>
-                    <p class="text-[10px] text-white/50 uppercase">${track.artist}</p>
-                    <p class="text-[8px] text-primary/70">${track.genre.replace('malayalam-', '').toUpperCase()}</p>
-                </div>
-                <button class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center">
-                    <i class="ph ph-dots-three text-lg"></i>
-                </button>
-            `;
-            return listItem;
-        }
-
-        function updateGenreRecommendations() {
-            recommendedSongs.innerHTML = '';
-            
-            // Get top 3 genres based on play counts
-            const sortedGenres = Object.entries(genrePreferences)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 3)
-                .map(entry => entry[0]);
-            
-            // If no genre preferences yet, use some default genres
-            const genresToShow = sortedGenres.length > 0 ? sortedGenres : 
-                ['malayalam-classic', 'malayalam-melody', 'malayalam-romantic'];
-            
-            // Collect 4-6 recommended songs from top genres
-            let recommendedSongsList = [];
-            
-            genresToShow.forEach(genre => {
-                const genreSongs = playlist.filter(track => track.genre === genre);
-                // Take 1-2 songs from each genre
-                const songsToAdd = genreSongs.slice(0, 2);
-                recommendedSongsList = [...recommendedSongsList, ...songsToAdd];
-            });
-            
-            // If still not enough, add random songs
-            if (recommendedSongsList.length < 4) {
-                const remainingSongs = playlist.filter(track => 
-                    !recommendedSongsList.some(rec => rec.title === track.title)
-                );
-                const randomSongs = remainingSongs
-                    .sort(() => 0.5 - Math.random())
-                    .slice(0, 4 - recommendedSongsList.length);
-                recommendedSongsList = [...recommendedSongsList, ...randomSongs];
-            }
-            
-            // Display recommended songs
-            recommendedSongsList.forEach((track, index) => {
-                const trackIndex = playlist.findIndex(t => t.title === track.title);
-                if (trackIndex === -1) return;
-                
-                const card = document.createElement('div');
-                card.className = 'min-w-[140px] group cursor-pointer';
-                card.onclick = () => playTrack(trackIndex);
-                card.innerHTML = `
-                    <div class="w-full aspect-square rounded-2xl overflow-hidden mb-3 relative">
-                        <img src="${track.cover}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <i class="ph-fill ph-play-circle text-4xl text-white"></i>
-                        </div>
-                    </div>
-                    <h4 class="font-bold text-sm truncate">${track.title}</h4>
-                    <p class="text-xs text-white/50 truncate">${track.artist.split('•')[0].trim()}</p>
-                `;
-                recommendedSongs.appendChild(card);
-            });
-            
-            // Update section title
-            const sectionTitle = document.querySelector('#genre-recommendations h3');
-            if (sortedGenres.length > 0) {
-                const topGenre = sortedGenres[0].replace('malayalam-', '');
-                sectionTitle.textContent = `Based on your ${topGenre} preference`;
-            } else {
-                sectionTitle.textContent = 'Popular Malayalam Songs';
-            }
-        }
-
-        // --- Search Functionality ---
-        function setupSearch() {
-            searchInput.addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase().trim();
-                
-                if (searchTerm.length === 0) {
-                    searchResults.innerHTML = '<p class="text-white/40 text-center py-8">Type to search for songs</p>';
-                    return;
-                }
-                
-                // Filter playlist based on search term
-                const filteredSongs = playlist.filter(track => 
-                    track.title.toLowerCase().includes(searchTerm) || 
-                    track.artist.toLowerCase().includes(searchTerm) ||
-                    track.genre.toLowerCase().includes(searchTerm)
-                );
-                
-                // Display results
-                searchResults.innerHTML = '';
-                
-                if (filteredSongs.length === 0) {
-                    searchResults.innerHTML = '<p class="text-white/40 text-center py-8">No songs found</p>';
-                    return;
-                }
-                
-                filteredSongs.forEach((track, index) => {
-                    const trackIndex = playlist.findIndex(t => t.title === track.title);
-                    const listItem = createSongListItem(track, trackIndex);
-                    searchResults.appendChild(listItem);
+        // Auth State
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                currentUser = user;
+                $('authView').style.display = 'none';
+                $('mainApp').style.display = 'flex';
+                db.ref('users/' + user.uid).on('value', snap => {
+                    currentProfile = snap.val();
+                    updateProfileUI();
                 });
-            });
+                db.ref('presence/' + user.uid).set(true);
+                db.ref('presence/' + user.uid).onDisconnect().remove();
+                loadPublicMessages();
+                generateCalendar();
+                loadLeaderboard();
+                syncProtein();
+                listenForNotifs();
+            } else {
+                $('authView').style.display = 'flex';
+                $('mainApp').style.display = 'none';
+                currentUser = null;
+            }
+        });
+
+        function updateProfileUI() {
+            if (!currentProfile) return;
+            $('displayNameSetting').innerText = currentProfile.username;
+            $('proteinGoalSetting').innerText = currentProfile.proteinGoal + 'g';
+            $('proteinTargetNote').innerText = 'Goal: ' + currentProfile.proteinGoal + 'g';
+            currentTarget = currentProfile.proteinGoal;
+            updateCircles();
         }
 
-        // --- Recently Played / Local Storage ---
-        function addToRecentlyPlayed(trackIndex) {
-            const track = playlist[trackIndex];
-            const playRecord = {
-                index: trackIndex,
-                title: track.title,
-                artist: track.artist,
-                cover: track.cover,
-                genre: track.genre,
-                timestamp: new Date().toISOString()
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.onclick = () => {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+                const target = item.dataset.section;
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                $(target).classList.add('active');
+                activeSection = target;
+                if (target === 'calendarSection') generateCalendar();
             };
-            
-            // Remove if already exists
-            recentlyPlayed = recentlyPlayed.filter(item => item.index !== trackIndex);
-            
-            // Add to beginning
-            recentlyPlayed.unshift(playRecord);
-            
-            // Keep only last 10
-            if (recentlyPlayed.length > 10) {
-                recentlyPlayed = recentlyPlayed.slice(0, 10);
-            }
-            
-            // Update play count for genre
-            updatePlayCount(track.genre);
-            
-            // Save to localStorage
-            saveToLocalStorage();
-            
-            // Update display
-            updateRecentlyPlayedDisplay();
-        }
+        });
 
-        function updateRecentlyPlayedDisplay() {
-            recentlyPlayedList.innerHTML = '';
-            
-            if (recentlyPlayed.length === 0) {
-                noRecentMessage.classList.remove('hidden');
-                recentCount.textContent = '0 tracks';
-                return;
-            }
-            
-            noRecentMessage.classList.add('hidden');
-            recentCount.textContent = `${recentlyPlayed.length} track${recentlyPlayed.length > 1 ? 's' : ''}`;
-            
-            recentlyPlayed.forEach((playRecord, index) => {
-                const listItem = document.createElement('div');
-                listItem.className = 'glass-card p-3 rounded-xl flex items-center gap-4 cursor-pointer hover:bg-white/5';
-                listItem.onclick = () => playTrack(playRecord.index);
-                listItem.innerHTML = `
-                    <span class="text-white/30 text-xs font-bold w-4">${index + 1}</span>
-                    <img src="${playRecord.cover}" class="w-12 h-12 rounded-lg object-cover">
-                    <div class="flex-1">
-                        <h4 class="font-bold text-sm">${playRecord.title}</h4>
-                        <p class="text-[10px] text-white/50 uppercase">${playRecord.artist}</p>
-                        <p class="text-[8px] text-white/20">Recently played</p>
-                    </div>
-                    <button class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center">
-                        <i class="ph ph-play text-lg"></i>
-                    </button>
-                `;
-                recentlyPlayedList.appendChild(listItem);
+        // Protein Logic
+        function syncProtein() {
+            const today = new Date().toISOString().split('T')[0];
+            db.ref(`users/${currentUser.uid}/logs/${today}/protein`).on('value', snap => {
+                proteinToday = snap.val() || 0;
+                updateCircles();
             });
         }
 
-        // --- Core Music Functions ---
-        function loadTrack(index, shouldPlay = true) {
-            currentIndex = index;
-            const track = playlist[index];
-            
-            audio.src = track.src;
-            
-            // Update UI Text
-            els.miniTitle.innerText = track.title;
-            els.miniArtist.innerText = track.artist;
-            els.fullTitle.innerText = track.title;
-            els.fullArtist.innerText = track.artist;
-            
-            // Update Images
-            els.miniArt.src = track.cover;
-            els.fullArt.src = track.cover;
-            els.blurBg.src = track.cover;
-            
-            // Update genre recommendations
-            currentGenre = track.genre;
-            
-            // Add to recently played
-            addToRecentlyPlayed(index);
-            
-            // Reset progress
-            els.miniProgress.style.width = '0%';
-            els.seek.value = 0;
-            els.currTime.innerText = '0:00';
-            
-            // Always show mini player when loading a track
-            miniPlayer.classList.remove('translate-y-[200%]');
-            miniPlayer.classList.add('translate-y-0');
-            
-            // Update play state to false initially
-            updatePlayState(false);
-            
-            // Auto-play the track if shouldPlay is true
-            if (shouldPlay) {
-                setTimeout(() => {
-                    audio.play().catch(e => console.log("Auto-play prevented:", e));
-                }, 100);
-            }
+        function updateCircles() {
+            const pct = Math.min(100, (proteinToday / currentTarget) * 100);
+            const angle = pct * 3.6;
+            $('proteinCircle').style.background = `conic-gradient(#ff7b4a 0deg ${angle}deg, #eef2f8 ${angle}deg 360deg)`;
+            $('proteinText').innerText = proteinToday + 'g';
+
+            // Mock Week/Month
+            $('weekPct').innerText = '75%';
+            $('monthPct').innerText = '62%';
+            $('weekCircle').style.background = `conic-gradient(#ff7b4a 0deg ${75 * 3.6}deg, #eef2f8 ${75 * 3.6}deg 360deg)`;
+            $('monthCircle').style.background = `conic-gradient(#1e2b4f 0deg ${62 * 3.6}deg, #eef2f8 ${62 * 3.6}deg 360deg)`;
         }
 
-        function playTrack(index) {
-            if(index !== currentIndex) {
-                // Load and auto-play the new track
-                loadTrack(index, true);
-            } else {
-                // Toggle play/pause for current track
-                togglePlay();
-            }
-        }
+        $('addProteinBtn').onclick = () => {
+            const today = new Date().toISOString().split('T')[0];
+            const newCount = proteinToday + 20;
+            db.ref(`users/${currentUser.uid}/logs/${today}`).update({ protein: newCount });
+            if (newCount >= currentTarget) db.ref(`users/${currentUser.uid}/checks/${today}`).set(true);
+        };
 
-        function togglePlay() {
-            if (isPlaying) {
-                audio.pause();
-            } else {
-                audio.play().catch(e => console.log("Play error:", e));
-                // Ensure mini player is visible if playing starts
-                miniPlayer.classList.remove('translate-y-[200%]');
-                miniPlayer.classList.add('translate-y-0');
-            }
-        }
+        // Save Quick add (Calories placeholder)
+        $('saveQuickAdd').onclick = () => {
+            const cal = $('quickCal').value;
+            if (!cal) return;
+            const today = new Date().toISOString().split('T')[0];
+            db.ref(`users/${currentUser.uid}/logs/${today}`).update({ calories: parseInt(cal) });
+            alert("Calories synced!");
+            $('quickCal').value = '';
+        };
 
-        function updatePlayState(playing) {
-            isPlaying = playing;
-            const icon = playing ? 'ph-pause' : 'ph-play';
-            
-            els.mainPlayIcon.className = `ph-fill ${icon} text-4xl ml-1`;
-            els.miniPlayBtn.innerHTML = `<i class="ph-fill ${icon} text-2xl"></i>`;
-            
-            // Animations
-            if(playing) {
-                els.miniArt.style.animationPlayState = 'running';
-                els.albumGlow.style.opacity = '0.6';
-                els.albumGlow.style.filter = 'blur(40px)';
-                els.miniWave.classList.remove('hidden');
-            } else {
-                els.miniArt.style.animationPlayState = 'paused';
-                els.albumGlow.style.opacity = '0.3';
-                els.albumGlow.style.filter = 'blur(30px)';
-                els.miniWave.classList.add('hidden');
-            }
-        }
+        // Calendar
+        function generateCalendar() {
+            const grid = $('calendarGrid');
+            grid.innerHTML = '';
+            const now = new Date();
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            $('calMonthTitle').innerText = now.toLocaleString('default', { month: 'long', year: 'numeric' });
 
-        function toggleLoop() {
-            isLooping = !isLooping;
-            audio.loop = isLooping;
-            
-            const loopIcon = els.loopBtn.querySelector('i');
-            if(isLooping) {
-                loopIcon.classList.remove('ph-repeat');
-                loopIcon.classList.add('ph-repeat-once');
-                els.loopBtn.classList.remove('text-white/40');
-                els.loopBtn.classList.add('text-primary');
-            } else {
-                loopIcon.classList.remove('ph-repeat-once');
-                loopIcon.classList.add('ph-repeat');
-                els.loopBtn.classList.remove('text-primary');
-                els.loopBtn.classList.add('text-white/40');
-            }
-        }
-
-        function toggleShuffle() {
-            isShuffled = !isShuffled;
-            
-            if(isShuffled) {
-                // Reset shuffle history when turning shuffle on
-                shuffleHistory = [currentIndex];
-                els.shuffleBtn.classList.remove('text-white/40');
-                els.shuffleBtn.classList.add('text-primary');
-            } else {
-                els.shuffleBtn.classList.remove('text-primary');
-                els.shuffleBtn.classList.add('text-white/40');
-            }
-        }
-
-        function nextTrack() {
-            if(isShuffled) {
-                // For shuffled mode, pick a random track but not the current one
-                let newIndex;
-                do {
-                    newIndex = Math.floor(Math.random() * playlist.length);
-                } while(newIndex === currentIndex && playlist.length > 1);
-                
-                // Add to shuffle history
-                shuffleHistory.push(newIndex);
-                if (shuffleHistory.length > 50) shuffleHistory.shift();
-                
-                currentIndex = newIndex;
-            } else {
-                // Normal sequential mode
-                currentIndex = (currentIndex + 1) % playlist.length;
-            }
-            
-            // Load and auto-play the next track
-            loadTrack(currentIndex, true);
-        }
-
-        function previousTrack() {
-            if(isShuffled && shuffleHistory.length > 1) {
-                // Go back in shuffle history
-                shuffleHistory.pop(); // Remove current
-                const prevIndex = shuffleHistory.pop(); // Get previous
-                if (prevIndex !== undefined) {
-                    currentIndex = prevIndex;
-                    shuffleHistory.push(currentIndex); // Add back
+            db.ref(`users/${currentUser.uid}/checks`).once('value', snap => {
+                const checks = snap.val() || {};
+                let count = 0;
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                    const day = document.createElement('div');
+                    day.className = 'cal-day';
+                    if (checks[dateStr]) { day.classList.add('checked'); count++; }
+                    if (i === now.getDate()) day.classList.add('today');
+                    day.innerText = i;
+                    grid.appendChild(day);
                 }
-            } else {
-                // Normal sequential mode
-                currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-            }
-            
-            // Load and auto-play the previous track
-            loadTrack(currentIndex, true);
-        }
-
-        // Audio Events
-        audio.onplay = () => updatePlayState(true);
-        audio.onpause = () => updatePlayState(false);
-        
-        audio.onended = () => {
-            if(!isLooping) {
-                // Auto play next song when current ends (only if loop is off)
-                setTimeout(() => {
-                    nextTrack();
-                }, 500);
-            } else {
-                // If loop is on, the current song will repeat automatically
-                // because audio.loop = true
-            }
-        };
-        
-        audio.ontimeupdate = () => {
-            if (audio.duration) {
-                const pct = (audio.currentTime / audio.duration) * 100;
-                els.miniProgress.style.width = `${pct}%`;
-                els.seek.value = pct || 0;
-                
-                els.currTime.innerText = formatTime(audio.currentTime);
-                els.durTime.innerText = formatTime(audio.duration);
-                
-                // Slider Track Fill
-                const val = els.seek.value;
-                els.seek.style.background = `linear-gradient(to right, #00ff66 ${val}%, rgba(255,255,255,0.1) ${val}%)`;
-            }
-        };
-
-        els.seek.oninput = () => {
-            const time = (els.seek.value / 100) * audio.duration;
-            audio.currentTime = time;
-        };
-
-        function skip(sec) {
-            audio.currentTime += sec;
-        }
-
-        function toggleFullPlayer(show) {
-            if(show) {
-                fullPlayer.classList.remove('translate-y-[100%]');
-            } else {
-                fullPlayer.classList.add('translate-y-[100%]');
-            }
-        }
-
-        function toggleLike() {
-            isLiked = !isLiked;
-            const icon = els.likeBtn.querySelector('i');
-            if(isLiked) {
-                els.likeBtn.classList.add('text-red-500');
-                els.likeBtn.classList.remove('text-white/30');
-            } else {
-                els.likeBtn.classList.remove('text-red-500');
-                els.likeBtn.classList.add('text-white/30');
-            }
-        }
-
-        function switchView(viewName) {
-            // Hide all views
-            ['home', 'search', 'library'].forEach(v => {
-                document.getElementById('view-' + v).classList.add('hidden');
+                const streakPct = Math.round((count / daysInMonth) * 100);
+                $('monthStreakVal').innerText = streakPct + '%';
+                $('monthBar').style.width = streakPct + '%';
             });
-            // Show target view
-            document.getElementById('view-' + viewName).classList.remove('hidden');
-            
-            // Clear search when leaving search view
-            if (viewName !== 'search') {
-                searchInput.value = '';
-                searchResults.innerHTML = '<p class="text-white/40 text-center py-8">Type to search for songs</p>';
-            }
-            
-            // Update genre recommendations when going to home
-            if (viewName === 'home') {
-                updateGenreRecommendations();
-            }
-            
-            // Update Nav Icons
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('text-primary');
-                btn.classList.add('text-white/40');
-                const i = btn.querySelector('i');
-                i.classList.remove('ph-fill');
-                i.classList.add('ph');
-            });
-            
-            const activeBtn = event.currentTarget;
-            activeBtn.classList.add('text-primary');
-            activeBtn.classList.remove('text-white/40');
-            const activeI = activeBtn.querySelector('i');
-            activeI.classList.remove('ph');
-            activeI.classList.add('ph-fill');
         }
 
-        function formatTime(s) {
-            if(!s || isNaN(s)) return "0:00";
-            const m = Math.floor(s / 60);
-            const sec = Math.floor(s % 60);
-            return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+        // Leaderboard
+        function loadLeaderboard() {
+            db.ref('users').orderByChild('points').limitToLast(50).on('value', snap => {
+                const users = [];
+                snap.forEach(child => users.push({ id: child.key, ...child.val() }));
+                users.reverse();
+                $('leaderboardList').innerHTML = users.map((u, i) => `
+        <div class="leaderboard-item" onclick="openPrivateChat('${u.id}', '${u.username}')">
+          <span class="rank">#${i + 1}</span>
+          <span class="name">${u.username}</span>
+          <span class="score">${u.consistency || 0}%</span>
+        </div>
+      `).join('');
+            });
         }
+
+        // Chat Sub-navigation
+        $('showPublicChat').onclick = () => {
+            $('publicChatPanel').style.display = 'block';
+            $('privateChatPanel').style.display = 'none';
+        };
+        $('showPrivateChat').onclick = () => {
+            $('publicChatPanel').style.display = 'none';
+            $('privateChatPanel').style.display = 'block';
+            // Load existing conversations if needed
+            $('privateList').innerHTML = '<div class="small-note">Select an athlete from Ranks to chat.</div>';
+        };
+
+        // Chat Logic
+        function loadPublicMessages() {
+            db.ref('public_chat').limitToLast(50).on('value', snap => {
+                let html = '';
+                snap.forEach(child => {
+                    const m = child.val();
+                    const isMe = m.uid === currentUser.uid;
+                    html += `<div class="bubble ${isMe ? 'me' : 'other'}">${!isMe ? '<span class="sender">' + m.name + '</span>' : ''}${m.text}</div>`;
+                });
+                $('publicMessages').innerHTML = html;
+                $('publicMessages').scrollTop = $('publicMessages').scrollHeight;
+            });
+        }
+
+        $('sendPublicBtn').onclick = () => {
+            const text = $('publicMsgInput').value.trim();
+            if (!text || !currentProfile) return;
+            db.ref('public_chat').push({ uid: currentUser.uid, name: currentProfile.username, text, ts: Date.now() });
+            $('publicMsgInput').value = '';
+        };
+
+        function openPrivateChat(uid, username) {
+            if (uid === currentUser.uid) return;
+            activePrivateChatUid = uid;
+            $('chatInterface').style.display = 'block';
+            $('privateList').style.display = 'none';
+            $('activeChatName').innerText = username;
+            const chatId = [currentUser.uid, uid].sort().join('_');
+            db.ref('private_chats/' + chatId).off(); // clean prev
+            db.ref('private_chats/' + chatId).on('value', snap => {
+                let html = '';
+                snap.forEach(child => {
+                    const m = child.val();
+                    html += `<div class="bubble ${m.uid === currentUser.uid ? 'me' : 'other'}">${m.text}</div>`;
+                });
+                $('privateMessages').innerHTML = html;
+                $('privateMessages').scrollTop = $('privateMessages').scrollHeight;
+            });
+            // switch tab to social
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelector('.nav-item[data-section="chatSection"]').classList.add('active');
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            $('chatSection').classList.add('active');
+        }
+
+        $('backToPrivateList').onclick = () => {
+            $('chatInterface').style.display = 'none';
+            $('privateList').style.display = 'block';
+        };
+
+        $('sendPrivateBtn').onclick = () => {
+            const text = $('privateMsgInput').value.trim();
+            if (!text || !activePrivateChatUid) return;
+            const chatId = [currentUser.uid, activePrivateChatUid].sort().join('_');
+            db.ref('private_chats/' + chatId).push({ uid: currentUser.uid, text, ts: Date.now() });
+            $('privateMsgInput').value = '';
+        };
+
+        // Food Search
+        $('foodSearchBtn').onclick = () => searchFoods();
+        $('foodSearchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') searchFoods(); });
+        function searchFoods() {
+            const query = $('foodSearchInput').value.toLowerCase();
+            const results = foodDB.filter(f =>
+                f.name.toLowerCase().includes(query) ||
+                (f.alt && f.alt.toLowerCase().includes(query))
+            );
+            $('foodResults').innerHTML = results.map(f => `
+      <div class="food-item">
+        <div class="food-info"><span class="food-name">${f.name}</span><span class="food-meta">${f.cat}</span></div>
+        <div class="food-stats">💪 ${f.protein}g | 🔥 ${(f.kcal || f.cal)}cal</div>
+      </div>
+    `).join('') || '<div class="small-note">No food found in "Swing" local database.</div>';
+        }
+
+        // Settings & Modals
+        $('editProteinBtn').onclick = () => $('goalModal').style.display = 'flex';
+        $('setGoalBtn').onclick = () => $('goalModal').style.display = 'flex';
+        $('closeGoalModal').onclick = () => $('goalModal').style.display = 'none';
+        $('saveGoalBtn').onclick = () => {
+            const newGoal = parseInt($('newGoalInput').value);
+            if (!newGoal) return;
+            db.ref('users/' + currentUser.uid).update({ proteinGoal: newGoal });
+            $('goalModal').style.display = 'none';
+        };
+
+        $('editNameBtn').onclick = () => {
+            $('newNameInput').value = currentProfile.username;
+            $('nameModal').style.display = 'flex';
+        };
+        $('closeNameModal').onclick = () => $('nameModal').style.display = 'none';
+        $('saveNameBtn').onclick = () => {
+            const newName = $('newNameInput').value.trim();
+            if (!newName) return;
+            db.ref('users/' + currentUser.uid).update({ username: newName });
+            $('nameModal').style.display = 'none';
+        };
+
+        $('logoutBtn').onclick = () => auth.signOut();
+
+        // Search People
+        $('searchPeopleBtn').onclick = () => {
+            const q = $('searchPeopleInput').value.toLowerCase();
+            db.ref('users').once('value', snap => {
+                let html = '';
+                snap.forEach(child => {
+                    const u = child.val();
+                    if (u.username && u.username.toLowerCase().includes(q) && child.key !== currentUser.uid) {
+                        html += `<div class="leaderboard-item" onclick="openPrivateChat('${child.key}', '${u.username}')"><span class="name">${u.username}</span><i class="fas fa-comment" style="color:#ff7b4a;"></i></div>`;
+                    }
+                });
+                $('searchResults').innerHTML = html || '<div class="small-note">No athlete found.</div>';
+            });
+        };
+
     </script>
 </body>
+
 </html>
