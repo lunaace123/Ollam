@@ -1,1261 +1,526 @@
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Swing · gym & diet</title>
-    <!-- Font Awesome (icons) & Firebase compat SDKs -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-        }
-
-        body {
-            background: #f5f7fb;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
-        }
-
-        #app {
-            width: 100%;
-            max-width: 430px;
-            background: white;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
-            border-radius: 32px 32px 0 0;
-            overflow: hidden;
-            position: relative;
-            height: 95vh;
-            display: flex;
-            flex-direction: column;
-            margin: 10px;
-        }
-
-        /* Auth screens */
-        #authView {
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            height: 100%;
-            background: linear-gradient(145deg, #f0f4fe, #ffffff);
-        }
-
-        .auth-card {
-            background: white;
-            border-radius: 32px;
-            padding: 28px 20px;
-            box-shadow: 0 10px 25px rgba(0, 20, 50, 0.1);
-            width: 100%;
-        }
-
-        .logo {
-            font-size: 2.4rem;
-            font-weight: 700;
-            color: #1e2b4f;
-            margin-bottom: 20px;
-            text-align: center;
-            letter-spacing: -0.5px;
-        }
-
-        .logo span {
-            color: #ff7b4a;
-        }
-
-        .input-group {
-            margin-bottom: 16px;
-        }
-
-        .input-group label {
-            font-weight: 500;
-            font-size: 0.9rem;
-            color: #2e3a5c;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 15px 18px;
-            border: 1.5px solid #e3e9f2;
-            border-radius: 24px;
-            font-size: 1rem;
-            transition: 0.2s;
-            background: #fafcff;
-        }
-
-        .input-group input:focus {
-            border-color: #ff7b4a;
-            outline: none;
-        }
-
-        .btn {
-            background: #1e2b4f;
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            width: 100%;
-            margin-top: 8px;
-            transition: 0.2s;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-secondary {
-            background: #ff7b4a;
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .toggle-auth {
-            text-align: center;
-            margin-top: 20px;
-            color: #5f6b8a;
-        }
-
-        .toggle-auth button {
-            background: none;
-            border: none;
-            color: #ff7b4a;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-
-        /* Main App layout */
-        .main-app {
-            display: none;
-            flex-direction: column;
-            height: 100%;
-            background: #f8faff;
-        }
-
-        .header {
-            padding: 20px 18px 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-            border-bottom: 1px solid #eef2f8;
-            flex-shrink: 0;
-        }
-
-        .header h1 {
-            font-size: 1.9rem;
-            font-weight: 700;
-            color: #1e2b4f;
-        }
-
-        .header h1 span {
-            color: #ff7b4a;
-        }
-
-        .header .user-icon {
-            font-size: 1.4rem;
-            color: #2e3a5c;
-            background: #f0f4fe;
-            padding: 10px;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .bell-icon {
-            font-size: 1.3rem;
-            color: #2e3a5c;
-            background: #f0f4fe;
-            padding: 10px;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .bell-icon .badge {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            background: #ff7b4a;
-            color: white;
-            font-size: 0.65rem;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            border: 2px solid white;
-        }
-
-        /* Content Area */
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 18px 16px 120px;
-            scroll-behavior: smooth;
-        }
-
-        /* Bottom navigation */
-        .bottom-nav {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 10px 25px;
-            background: white;
-            border-top: 1px solid #eef2f8;
-            box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.02);
-            z-index: 10;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #8a99b5;
-            transition: 0.2s;
-            font-size: 0.75rem;
-            cursor: pointer;
-        }
-
-        .nav-item i {
-            font-size: 1.5rem;
-            margin-bottom: 3px;
-        }
-
-        .nav-item.active {
-            color: #ff7b4a;
-            font-weight: 600;
-        }
-
-        /* Cards & UI elements */
-        .section-title {
-            font-weight: 600;
-            color: #1e2b4f;
-            margin: 24px 0 12px;
-            font-size: 1.2rem;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
-
-        .circle-card {
-            background: white;
-            border-radius: 24px;
-            padding: 18px 10px;
-            text-align: center;
-            box-shadow: 0 8px 18px #e9edf4;
-        }
-
-        .progress-circle {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            margin: 10px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            transition: 1s ease-out;
-        }
-
-        .progress-circle inner {
-            background: white;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.4rem;
-            color: #1e2b4f;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            background: white;
-            padding: 16px;
-            border-radius: 28px;
-        }
-
-        .cal-day {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 500;
-            background: #f5f8ff;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            color: #1e2b4f;
-            cursor: pointer;
-        }
-
-        .cal-day.checked {
-            background: #ff7b4a;
-            color: white;
-            font-weight: 600;
-        }
-
-        .cal-day.today {
-            border: 2px solid #ff7b4a;
-        }
-
-        /* Search & Food */
-        .search-box {
-            display: flex;
-            background: white;
-            border-radius: 44px;
-            padding: 5px 5px 5px 20px;
-            margin: 15px 0;
-            border: 1px solid #e9eef6;
-            width: 100%;
-        }
-
-        .search-box input {
-            flex: 1;
-            border: none;
-            background: none;
-            padding: 12px 0;
-            font-size: 1rem;
-        }
-
-        .search-box input:focus {
-            outline: none;
-        }
-
-        .search-box button {
-            background: #1e2b4f;
-            border: none;
-            color: white;
-            width: 48px;
-            border-radius: 40px;
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-
-        .food-item {
-            background: white;
-            padding: 14px 18px;
-            border-radius: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
-        }
-
-        .food-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .food-name {
-            font-weight: 600;
-            color: #1e2b4f;
-        }
-
-        .food-meta {
-            font-size: 0.8rem;
-            color: #8a99b5;
-        }
-
-        .food-stats {
-            font-weight: 700;
-            color: #ff7b4a;
-        }
-
-        /* Chat system */
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            min-height: 400px;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px 5px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .bubble {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 24px;
-            margin-bottom: 10px;
-            font-size: 0.95rem;
-            line-height: 1.4;
-            position: relative;
-        }
-
-        .bubble .sender {
-            font-size: 0.75rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-            display: block;
-        }
-
-        .bubble.me {
-            background: #1e2b4f;
-            color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: 6px;
-        }
-
-        .bubble.other {
-            background: #e9effa;
-            color: #1e2b4f;
-            align-self: flex-start;
-            border-bottom-left-radius: 6px;
-        }
-
-        .chat-footer {
-            display: flex;
-            gap: 8px;
-            background: white;
-            padding: 10px;
-            border-radius: 40px;
-            margin-top: 15px;
-            border: 1px solid #eef2f8;
-        }
-
-        .chat-footer input {
-            flex: 1;
-            border: none;
-            background: #f0f4fe;
-            border-radius: 40px;
-            padding: 14px 18px;
-            font-size: 1rem;
-        }
-
-        .chat-footer input:focus {
-            outline: none;
-        }
-
-        .send-btn {
-            background: none;
-            border: none;
-            font-size: 1.3rem;
-            color: #ff7b4a;
-            cursor: pointer;
-            padding: 0 10px;
-        }
-
-        /* Leaderboard */
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            background: white;
-            padding: 12px 18px;
-            border-radius: 40px;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .leaderboard-item:active {
-            transform: scale(0.98);
-            background: #f0f4fe;
-        }
-
-        .rank {
-            font-weight: 800;
-            width: 35px;
-            color: #ff7b4a;
-            font-size: 1.1rem;
-        }
-
-        .name {
-            flex: 1;
-            font-weight: 600;
-            color: #1e2b4f;
-        }
-
-        .score {
-            background: #eef2f8;
-            padding: 6px 14px;
-            border-radius: 40px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #1e2b4f;
-        }
-
-        .online-indicator {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #42e672;
-            display: inline-block;
-            margin-left: 8px;
-            border: 2px solid white;
-            box-shadow: 0 0 5px rgba(66, 230, 114, 0.5);
-        }
-
-        /* Settings */
-        .settings-option {
-            background: white;
-            padding: 18px 22px;
-            border-radius: 24px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
-        }
-
-        .settings-option span:first-child {
-            font-weight: 600;
-            color: #1e2b4f;
-        }
-
-        .settings-val {
-            color: #8a99b5;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-
-        .small-note {
-            font-size: 0.8rem;
-            color: #8895b7;
-            margin: 8px 0;
-            text-align: center;
-        }
-
-        .section {
-            display: none;
-        }
-
-        .section.active {
-            display: block;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        /* Modal for Goal / Profile Edit */
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal-card {
-            background: white;
-            border-radius: 32px;
-            padding: 30px 24px;
-            width: 100%;
-            max-width: 350px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MistMC Admin - Unified Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Montserrat:wght@900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #0e0e0e;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+    .glass-card {
+      background: rgba(20,20,20,0.8);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .status-pending {
+      color: #f59e0b;
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.2);
+    }
+    .status-approved {
+      color: #10b981;
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.2);
+    }
+    .status-rejected {
+      color: #ef4444;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+    .btn-red {
+      background: #ff4d4d;
+      color: #fff;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .btn-red:hover {
+      background: #ff3333;
+      transform: translateY(-1px);
+    }
+    .option-row {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .winner-badge {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      box-shadow: 0 0 15px rgba(245,158,11,0.3);
+    }
+    .tab-active {
+      background: rgba(255, 77, 77, 0.15);
+      color: #ff4d4d;
+      border-color: rgba(255, 77, 77, 0.4);
+    }
+    .tab-inactive {
+      background: rgba(255,255,255,0.03);
+      color: #9ca3af;
+      border-color: rgba(255,255,255,0.08);
+    }
+    .tab-inactive:hover {
+      background: rgba(255,255,255,0.07);
+      color: #e5e7eb;
+    }
+    /* Custom scroll for voters list */
+    .voters-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .voters-scroll::-webkit-scrollbar-track {
+      background: #1f1f1f;
+      border-radius: 8px;
+    }
+    .voters-scroll::-webkit-scrollbar-thumb {
+      background: #ff4d4d;
+      border-radius: 8px;
+    }
+  </style>
+  <!-- disable right click & devtools shortcuts (simple protection) -->
+  <script>
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C'))) {
+        e.preventDefault();
+      }
+    });
+  </script>
 </head>
+<body class="p-4 md:p-8">
 
-<body>
-    <div id="app">
-        <!-- AUTH View -->
-        <div id="authView">
-            <div class="auth-card">
-                <div class="logo">Swing<span>.</span></div>
-                <div id="loginForm">
-                    <div class="input-group"><label>Email</label><input type="email" id="loginEmail"
-                            placeholder="your@email.com"></div>
-                    <div class="input-group"><label>Password</label><input type="password" id="loginPassword"
-                            placeholder="••••••••"></div>
-                    <button class="btn" id="loginBtn">Log in</button>
-                </div>
-                <div id="registerForm" style="display:none;">
-                    <div class="input-group"><label>Display name</label><input type="text" id="regName"
-                            placeholder="Swing User"></div>
-                    <div class="input-group"><label>Email</label><input type="email" id="regEmail"
-                            placeholder="your@email.com"></div>
-                    <div class="input-group"><label>Password</label><input type="password" id="regPassword"
-                            placeholder="min 6 chars"></div>
-                    <button class="btn btn-secondary" id="registerBtn">Register</button>
-                </div>
-                <div class="toggle-auth">
-                    <span id="toggleTxt">No account?</span> <button id="toggleAuthBtn">Register</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- MAIN APP View -->
-        <div id="mainApp" class="main-app">
-            <div class="header">
-                <h1>Swing<span>.</span></h1>
-                <div class="header-actions">
-                    <div id="notifBell" class="bell-icon"><i class="fas fa-bell"></i><span id="notifBadge" class="badge"
-                            style="display:none;">0</span></div>
-                    <div class="user-icon" id="headerProfileIcon"><i class="fas fa-user-circle"></i></div>
-                </div>
-            </div>
-
-            <!-- dynamic content sections -->
-            <div class="content" id="contentArea">
-                <!-- home section (progress circles) -->
-                <div class="section active" id="homeSection">
-                    <div class="section-title">Today's protein</div>
-                    <div class="circle-card">
-                        <div class="progress-circle" id="proteinCircle"
-                            style="background: conic-gradient(#ff7b4a 0deg, #eef2f8 0deg);">
-                            <inner id="proteinText">0g</inner>
-                        </div>
-                        <div style="display:flex; gap:12px; justify-content:center; margin-top:16px;">
-                            <button class="btn" style="padding:10px 20px; width:auto; font-size: 0.9rem;"
-                                id="addProteinBtn">+20g</button>
-                            <button class="btn btn-secondary" style="padding:10px 20px; width:auto; font-size: 0.9rem;"
-                                id="setGoalBtn">Goal</button>
-                        </div>
-                        <div class="small-note" style="margin-top: 10px;" id="proteinTargetNote">Goal: 120g</div>
-                    </div>
-
-                    <div class="section-title">Consistency</div>
-                    <div class="grid-2">
-                        <div class="circle-card">
-                            <div class="progress-circle" id="weekCircle"
-                                style="background:conic-gradient(#ff7b4a 0deg 0deg, #eef2f8 0deg 360deg); height: 80px; width: 80px;">
-                                <inner style="width:65px; height:65px; font-size: 1.1rem;" id="weekPct">0%</inner>
-                            </div><span style="font-size: 0.8rem; font-weight: 600;">week</span>
-                        </div>
-                        <div class="circle-card">
-                            <div class="progress-circle" id="monthCircle"
-                                style="background:conic-gradient(#1e2b4f 0deg 0deg, #eef2f8 0deg 360deg); height: 80px; width: 80px;">
-                                <inner style="width:65px; height:65px; font-size: 1.1rem;" id="monthPct">0%</inner>
-                            </div><span style="font-size: 0.8rem; font-weight: 600;">month</span>
-                        </div>
-                    </div>
-
-                    <div class="section-title">Manual Diet Entry</div>
-                    <div
-                        style="background:white; border-radius:28px; padding:18px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
-                        <div class="input-group"><label>Quick Add Calories</label><input type="number" id="quickCal"
-                                placeholder="e.g. 500" style="padding: 12px 18px;"></div>
-                        <button class="btn" style="padding:12px;" id="saveQuickAdd">Sync Daily Goal</button>
-                    </div>
-                </div>
-
-                <!-- calendar section -->
-                <div class="section" id="calendarSection">
-                    <div class="section-title" id="calMonthTitle">March 2025</div>
-                    <div class="calendar-grid" id="calendarGrid"></div>
-                    <div class="small-note">Tap day to mark protein goal ✓</div>
-                    <div
-                        style="margin-top:20px; background:white; border-radius:28px; padding:20px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
-                        <div style="margin-bottom: 10px; font-weight: 600;">Month Streak <span
-                                style="float:right; color:#1e2b4f;" id="monthStreakVal">0%</span></div>
-                        <div style="width:100%; height:8px; background:#f0f4fe; border-radius:10px; overflow:hidden;">
-                            <div id="monthBar" style="width:0%; height:100%; background:#ff7b4a; transition: 1s;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- leaderboard section -->
-                <div class="section" id="leaderboardSection">
-                    <div class="section-title">🏆 consistency leaderboard</div>
-                    <div id="leaderboardList"></div>
-                    <div class="section-title">🔍 search people</div>
-                    <div class="search-box"><input placeholder="username..." id="searchPeopleInput"><button
-                            id="searchPeopleBtn"><i class="fas fa-search"></i></button></div>
-                    <div id="searchResults"></div>
-                </div>
-
-                <!-- chat section -->
-                <div class="section" id="chatSection">
-                    <div style="display:flex; gap:10px; margin-bottom:15px;">
-                        <button class="btn" style="padding:10px; flex:1; font-size: 0.9rem;" id="showPublicChat">💬
-                            public lounge</button>
-                        <button class="btn btn-secondary" style="padding:10px; flex:1; font-size: 0.9rem;"
-                            id="showPrivateChat">🔐 private chats</button>
-                    </div>
-                    <div id="publicChatPanel">
-                        <div class="chat-container">
-                            <div class="chat-messages" id="publicMessages"></div>
-                            <div class="chat-footer"><input id="publicMsgInput" placeholder="Write something..."><button
-                                    class="send-btn" id="sendPublicBtn"><i class="fas fa-paper-plane"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="privateChatPanel" style="display:none;">
-                        <div id="privateList"></div>
-                        <div id="chatInterface" style="display:none;">
-                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;"><button
-                                    class="btn" style="width:40px; height:40px; padding:0;" id="backToPrivateList"><i
-                                        class="fas fa-arrow-left"></i></button>
-                                <h4 id="activeChatName">Chatting...</h4>
-                            </div>
-                            <div class="chat-container">
-                                <div class="chat-messages" id="privateMessages"></div>
-                                <div class="chat-footer"><input id="privateMsgInput"
-                                        placeholder="Private msg..."><button class="send-btn" id="sendPrivateBtn"><i
-                                            class="fas fa-paper-plane"></i></button></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- food search section -->
-                <div class="section" id="foodSection">
-                    <div class="section-title">🍏 Kerala & world foods</div>
-                    <div class="search-box"><input id="foodSearchInput" placeholder="e.g. alfam, mandhi, egg"><button
-                            id="foodSearchBtn"><i class="fas fa-search"></i></button></div>
-                    <div id="foodResults"></div>
-                </div>
-
-                <!-- settings section -->
-                <div class="section" id="settingsSection">
-                    <div class="section-title">⚙️ profile setup</div>
-                    <div class="settings-option"><span>Display Name</span>
-                        <div class="settings-val" id="editNameBtn"><span id="displayNameSetting">Swing User</span> <i
-                                class="fas fa-chevron-right"></i></div>
-                    </div>
-                    <div class="settings-option"><span>Daily Protein (g)</span>
-                        <div class="settings-val" id="editProteinBtn"><span id="proteinGoalSetting">120g</span> <i
-                                class="fas fa-chevron-right"></i></div>
-                    </div>
-                    <div class="settings-option"><span>Notifications</span> <i class="fas fa-toggle-on"
-                            style="color:#ff7b4a; font-size:1.8rem;"></i></div>
-                    <button class="btn" id="logoutBtn" style="background:#ff7b4a; margin-top: 20px;">Log out</button>
-                </div>
-
-                <!-- Notifications section -->
-                <div class="section" id="notificationsSection">
-                    <div class="section-title">🔔 Notifications</div>
-                    <div id="notificationList">
-                        <div class="small-note">No new notifications.</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bottom Navigation -->
-            <div class="bottom-nav">
-                <div class="nav-item active" data-section="homeSection"><i class="fas fa-home"></i><span>Home</span>
-                </div>
-                <div class="nav-item" data-section="calendarSection"><i
-                        class="fas fa-calendar-alt"></i><span>History</span></div>
-                <div class="nav-item" data-section="leaderboardSection"><i class="fas fa-trophy"></i><span>Ranks</span>
-                </div>
-                <div class="nav-item" data-section="chatSection"><i class="fas fa-comment-dots"></i><span>Social</span>
-                </div>
-                <div class="nav-item" data-section="foodSection"><i class="fas fa-utensils"></i><span>Food</span></div>
-                <div class="nav-item" data-section="settingsSection"><i class="fas fa-sliders-h"></i><span>More</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- GOAL MODAL -->
-        <div class="modal" id="goalModal">
-            <div class="modal-card">
-                <h3 style="margin-bottom: 20px; color:#1e2b4f;">Update Protein Goal</h3>
-                <div class="input-group"><label>Goal in grams</label><input type="number" id="newGoalInput"
-                        placeholder="120"></div>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn" style="flex:1;" id="saveGoalBtn">Save</button>
-                    <button class="btn btn-secondary" style="flex:1; background:#8a99b5;"
-                        id="closeGoalModal">Cancel</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- NAME MODAL -->
-        <div class="modal" id="nameModal">
-            <div class="modal-card">
-                <h3 style="margin-bottom: 20px; color:#1e2b4f;">Edit Name</h3>
-                <div class="input-group"><label>Display Name</label><input type="text" id="newNameInput"
-                        placeholder="Username"></div>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn" style="flex:1;" id="saveNameBtn">Save</button>
-                    <button class="btn btn-secondary" style="flex:1; background:#8a99b5;"
-                        id="closeNameModal">Cancel</button>
-                </div>
-            </div>
-        </div>
+<div class="max-w-7xl mx-auto">
+  <!-- Unified Header -->
+  <header class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
+    <div class="flex items-center gap-4">
+      <img src="https://i.ibb.co/Y7kd673X/6bdb793d-aa0a-4616-ae6b-42f4c7cafe46.png" alt="MistMC Logo" class="w-12 h-12 object-contain" />
+      <div>
+        <h1 class="text-3xl font-black text-white font-['Montserrat'] tracking-tight">ADMIN DASHBOARD</h1>
+        <p class="text-gray-500 text-sm">Orders & Polls Control Center</p>
+      </div>
     </div>
+    <div class="flex items-center gap-3">
+      <span class="bg-red-500/10 text-red-500 px-3 py-1 rounded-lg border border-red-500/20 text-[10px] font-bold uppercase tracking-widest">Secure Access</span>
+    </div>
+  </header>
 
-    <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAHrBE3doAhDni4mcNhylJD8o3r5cNZYSI",
-            authDomain: "ls-mannage.firebaseapp.com",
-            databaseURL: "https://ls-mannage-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "ls-mannage",
-            storageBucket: "ls-mannage.firebasestorage.app",
-            messagingSenderId: "115534926798",
-            appId: "1:115534926798:web:4ea3ab3c1a2d44e2e1d19f",
-            measurementId: "G-P2JQH8M41Y"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
+  <!-- Tab Navigation -->
+  <div class="flex gap-3 mb-8 border-b border-white/10 pb-3">
+    <button id="tab-orders-btn" class="tab-active flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wide transition-all border">
+      <i data-lucide="shopping-cart" class="w-4 h-4"></i> Order Management
+    </button>
+    <button id="tab-polls-btn" class="tab-inactive flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wide transition-all border">
+      <i data-lucide="vote" class="w-4 h-4"></i> Poll Management
+    </button>
+  </div>
 
-        // State
-        let currentUser = null;
-        let currentProfile = null;
-        let activeSection = 'homeSection';
-        let proteinToday = 0;
-        let currentTarget = 120;
-        let activePrivateChatUid = null;
-        let unreadNotifications = 0;
+  <!-- ORDERS SECTION (tab content) -->
+  <div id="orders-section" class="transition-all duration-300">
+    <div class="max-w-6xl">
+      <div id="requests-list">
+        <div class="text-center py-20 text-gray-600">Loading payment requests...</div>
+      </div>
+    </div>
+  </div>
 
-        // Food Database (Expanded with Manglish/Malayalam support)
-        const foodDB = [
-            // SADYA & TRADITIONAL VEGETARIAN DISHES
-            { name: "Kaalan (കാളൻ)", kcal: 120, protein: 3, cat: "Sadhya", alt: "kalan" },
-            { name: "Pachadi - Pineapple/Beetroot (പച്ചടി)", kcal: 140, protein: 2, cat: "Sadhya", alt: "pachadi" },
-            { name: "Kichadi (കിച്ചടി)", kcal: 130, protein: 2, cat: "Sadhya", alt: "kichadi" },
-            { name: "Parippu Curry (പരിപ്പ് കറി)", kcal: 150, protein: 8, cat: "Sadhya", alt: "parippu" },
-            { name: "Cherupayar Curry (ചെറുപയർ കറി)", kcal: 160, protein: 9, cat: "Sadhya", alt: "cherupayar" },
-            { name: "Mambazha Pulissery (മാമ്പഴ പുളിശ്ശേരി)", kcal: 110, protein: 2, cat: "Sadhya", alt: "pulissery" },
-            { name: "Naranga Curry (നാരങ്ങ കറി)", kcal: 90, protein: 1, cat: "Sadhya", alt: "naranga pickle" },
-            { name: "Manga Curry (മാങ്ങ കറി)", kcal: 95, protein: 1, cat: "Sadhya", alt: "manga pickle" },
-            { name: "Cabbage Thoran (കാബേജ് തോരൻ)", kcal: 95, protein: 3, cat: "Sadhya", alt: "thoran" },
-            { name: "Beetroot Thoran (ബീറ്റ്റൂട്ട് തോരൻ)", kcal: 100, protein: 2, cat: "Sadhya", alt: "thoran" },
-            { name: "Vendakka Mezhukkupuratti (വെണ്ടയ്ക്ക മെഴുക്കുപുരട്ടി)", kcal: 85, protein: 2, cat: "Side", alt: "vendakka" },
-            { name: "Kovakka Fry (കോവയ്ക്ക ഫ്രൈ)", kcal: 90, protein: 2, cat: "Side", alt: "kovakka" },
-            { name: "Pavakka Fry (പാവയ്ക്ക ഫ്രൈ)", kcal: 110, protein: 2, cat: "Side", alt: "pavakka" },
-            { name: "Urula Kizhangu Roast (ഉരുളക്കിഴങ്ങ് റോസ്റ്റ്)", kcal: 150, protein: 3, cat: "Side", alt: "potato roast" },
-            { name: "Puli Inji (പുളി ഇഞ്ചി)", kcal: 130, protein: 1, cat: "Sadhya", alt: "inji curry" },
-            { name: "Upperi - Sharkkara Varatti (ഉപ്പേരി)", kcal: 480, protein: 2, cat: "Snack", alt: "upperi sharkara" },
-            { name: "Papadam (പപ്പടം)", kcal: 512, protein: 25, cat: "Sadhya", alt: "pappadam" },
+  <!-- POLLS SECTION (hidden initially) -->
+  <div id="polls-section" class="hidden transition-all duration-300">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Create Poll Form -->
+      <div class="lg:col-span-1">
+        <div class="glass-card rounded-2xl p-6 sticky top-8">
+          <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+            <i data-lucide="plus-circle" class="text-red-500"></i> Create New Poll
+          </h2>
+          <div class="space-y-4">
+            <div>
+              <label class="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Poll Title</label>
+              <input type="text" id="poll-title" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-red-500/50 outline-none transition-all" placeholder="Should we add Lifesteal?">
+            </div>
+            <div>
+              <label class="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Image URL</label>
+              <input type="text" id="poll-image" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-red-500/50 outline-none transition-all" placeholder="https://i.ibb.co/...">
+            </div>
+            <div>
+              <label class="text-[10px] uppercase font-bold text-gray-500 mb-2 block">Voting Options</label>
+              <div id="options-container" class="space-y-2 mb-3"></div>
+              <button onclick="window.addOptionField()" type="button" class="text-[10px] text-red-400 hover:text-red-300 font-bold uppercase tracking-widest flex items-center gap-1">
+                <i data-lucide="plus" class="w-3 h-3"></i> Add Option
+              </button>
+            </div>
+            <div>
+              <label class="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Description / Content</label>
+              <textarea id="poll-content" rows="4" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-red-500/50 outline-none transition-all resize-none" placeholder="Give more details about the poll..."></textarea>
+            </div>
+            <button onclick="window.createPoll()" class="btn-red w-full py-4 rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2">
+              <i data-lucide="send" class="w-4 h-4"></i> Create Poll
+            </button>
+          </div>
+        </div>
+      </div>
 
-            // FISH & SEAFOOD
-            { name: "Mathi Fry - Sardine (മത്തി ഫ്രൈ)", kcal: 200, protein: 22, cat: "Fish", alt: "mathi" },
-            { name: "Ayala Fry - Mackerel (അയല ഫ്രൈ)", kcal: 220, protein: 21, cat: "Fish", alt: "ayala" },
-            { name: "Neymeen Fry - Seer Fish (നെയ്മീൻ ഫ്രൈ)", kcal: 240, protein: 23, cat: "Fish", alt: "neymeen" },
-            { name: "Kanava Roast - Squid (കണവ റോസ്റ്റ്)", kcal: 175, protein: 18, cat: "Seafood", alt: "kanava" },
-            { name: "Chemmeen Theeyal (ചെമ്മീൻ തീയൽ)", kcal: 160, protein: 17, cat: "Seafood", alt: "chemmeen" },
-            { name: "Crab Masala (ഞണ്ട് മസാല)", kcal: 190, protein: 18, cat: "Seafood", alt: "crab nhandu" },
-            { name: "Dry Fish Chammanthi (ഉണക്കമീൻ ചമ്മന്തി)", kcal: 250, protein: 30, cat: "Fish", alt: "unakkameen" },
-            { name: "Meen Peera (മീൻ പീര)", kcal: 150, protein: 16, cat: "Fish", alt: "peera" },
-            { name: "Fish Cutlet (ഫിഷ് കട്ട്ലറ്റ്)", kcal: 260, protein: 14, cat: "Fish", alt: "cutlet" },
+      <!-- Polls List -->
+      <div class="lg:col-span-2 space-y-6" id="polls-list">
+        <div class="text-center py-20 text-gray-600">Loading polls...</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-            // CHICKEN DISHES
-            { name: "Chicken Varutharachathu (ചിക്കൻ വറുത്തരച്ചത്)", kcal: 240, protein: 22, cat: "Chicken", alt: "chicken curry" },
-            { name: "Chicken Chukka (ചിക്കൻ ചുക്ക)", kcal: 230, protein: 21, cat: "Chicken", alt: "chukka" },
-            { name: "Chicken Kondattam (ചിക്കൻ കൊണ്ടാട്ടം)", kcal: 260, protein: 20, cat: "Chicken", alt: "kondattam" },
-            { name: "Chicken 65 Kerala Style (ചിക്കൻ 65)", kcal: 300, protein: 23, cat: "Chicken", alt: "65" },
-            { name: "Chicken Cutlet (ചിക്കൻ കട്ട്ലറ്റ്)", kcal: 280, protein: 15, cat: "Chicken", alt: "cutlet" },
-            { name: "Chicken Puffs (ചിക്കൻ പഫ്സ്)", kcal: 320, protein: 9, cat: "Bakery", alt: "puff" },
-            { name: "Chicken Kizhi Parotta (കിഴി പൊറോട്ട)", kcal: 350, protein: 18, cat: "Main", alt: "kizhi" },
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getDatabase, ref, onValue, update, set, remove, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-            // BEEF / PORK / MUTTON
-            { name: "Beef Chilli (ബീഫ് ചില്ലി)", kcal: 290, protein: 25, cat: "Beef", alt: "beef" },
-            { name: "Beef Fry Coconut Style (ബീഫ് ഫ്രൈ)", kcal: 320, protein: 27, cat: "Beef", alt: "beef olathiyathu bdf" },
-            { name: "Beef Cutlet (ബീഫ് കട്ട്ലറ്റ്)", kcal: 300, protein: 16, cat: "Beef", alt: "cutlet" },
-            { name: "Pork Vindaloo (പോർക്ക് വിന്താലു)", kcal: 310, protein: 26, cat: "Pork", alt: "pork" },
-            { name: "Pork Roast (പോർക്ക് റോസ്റ്റ്)", kcal: 330, protein: 28, cat: "Pork", alt: "pork" },
-            { name: "Mutton Chaps (മട്ടൻ ചാപ്സ്)", kcal: 300, protein: 25, cat: "Mutton", alt: "mutton" },
-            { name: "Mutton Stew (മട്ടൻ സ്റ്റ്യൂ)", kcal: 240, protein: 23, cat: "Mutton", alt: "stew" },
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyAHrBE3doAhDni4mcNhylJD8o3r5cNZYSI",
+    authDomain: "ls-mannage.firebaseapp.com",
+    databaseURL: "https://ls-mannage-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "ls-mannage",
+    storageBucket: "ls-mannage.firebasestorage.app",
+    messagingSenderId: "115534926798",
+    appId: "1:115534926798:web:4ea3ab3c1a2d44e2e1d19f",
+    measurementId: "G-P2JQH8M41Y"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-            // MALABAR SPECIALS
-            { name: "Coin Porotta (കോയിൻ പൊറോട്ട)", kcal: 320, protein: 6, cat: "Bread", alt: "porotta" },
-            { name: "Kothu Porotta (കൊത്തു പൊറോട്ട)", kcal: 350, protein: 12, cat: "Main", alt: "kothu" },
-            { name: "Meen Pathiri (മീൻ പത്തിരി)", kcal: 290, protein: 14, cat: "Malabar", alt: "pathiri" },
-            { name: "Chicken Al Faham (അൽ ഫഹം)", kcal: 220, protein: 25, cat: "Malabar", alt: "alfaham farooj" },
-            { name: "Mandhi (മന്തി)", kcal: 210, protein: 18, cat: "Malabar", alt: "kuzhimanthi mandhi" },
-            { name: "Mutta Thengapal (മുട്ട തേങ്ങാപ്പാൽ)", kcal: 240, protein: 7, cat: "Malabar", alt: "egg curry" },
-            { name: "Ottada (ഓട്ടട)", kcal: 200, protein: 4, cat: "Malabar", alt: "ada" },
+  // ------------------- GLOBAL FUNCTIONS (ORDERS) -------------------
+  window.updateStatus = async (uid, orderId, status) => {
+    try {
+      const updates = {};
+      updates[`requests/${orderId}/status`] = status;
+      updates[`orders/${uid}/${orderId}/status`] = status;
+      await update(ref(db), updates);
+      alert(`Order ${status}!`);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update status");
+    }
+  };
 
-            // TRIBAL & RURAL
-            { name: "Ragi Mudde (രാഗി മുദ്ദ)", kcal: 180, protein: 5, cat: "Tribal", alt: "ragi" },
-            { name: "Kambu Porridge (കമ്പ് കഞ്ഞി)", kcal: 150, protein: 4, cat: "Tribal", alt: "kanji" },
-            { name: "Bamboo Shoot Curry (മുളങ്കമ്പ് കറി)", kcal: 90, protein: 2, cat: "Tribal", alt: "mulamkambu" },
-            { name: "Wild Boar Curry (കാട്ടുപന്നി കറി)", kcal: 250, protein: 24, cat: "Tribal", alt: "panni curry" },
-            { name: "Tapioca Leaf Curry (ചീനി ഇല കറി)", kcal: 100, protein: 3, cat: "Tribal", alt: "kappa ila" },
+  window.deleteRequest = async (uid, orderId) => {
+    if (!confirm("Are you sure you want to delete this request permanently?")) return;
+    try {
+      const updates = {};
+      updates[`requests/${orderId}`] = null;
+      if (uid && uid !== 'undefined' && uid !== 'null') {
+        updates[`orders/${uid}/${orderId}`] = null;
+      }
+      await update(ref(db), updates);
+      alert("Request deleted successfully!");
+    } catch (error) {
+      console.error("Delete failed:", error);
+      alert("Failed to delete: " + error.message);
+    }
+  };
 
-            // BREADS & RICE
-            { name: "Ghee Rice (നെയ്‌ചോറ്)", kcal: 210, protein: 4, cat: "Rice", alt: "neychoru" },
-            { name: "Jeerakasala Rice (ജീരകശാല അരി)", kcal: 130, protein: 3, cat: "Rice", alt: "kaima biriyani rice" },
-            { name: "Lemon Rice Kerala Style (നാരങ്ങ ചോറ്)", kcal: 180, protein: 4, cat: "Rice", alt: "naranga choru" },
-            { name: "Tamarind Rice (പുളിഞ്ചോറ്)", kcal: 200, protein: 5, cat: "Rice", alt: "pulinchoru" },
-            { name: "Coconut Rice (തേങ്ങ ചോറ്)", kcal: 220, protein: 4, cat: "Rice", alt: "thenga choru" },
-            { name: "Wheat Dosa (ഗോതമ്പ് ദോശ)", kcal: 170, protein: 5, cat: "Bread", alt: "gothambu dosa" },
-            { name: "Ragi Dosa (രാഗി ദോശ)", kcal: 160, protein: 4, cat: "Bread", alt: "ragi dosa" },
-            { name: "Chapati (ചപ്പാത്തി)", kcal: 120, protein: 3, cat: "Bread", alt: "chappathi" },
-
-            // STREET FOOD
-            { name: "Kerala Shawarma (ഷവർമ)", kcal: 250, protein: 15, cat: "Street", alt: "shawarma" },
-            { name: "Egg Puffs (മുട്ട പഫ്സ്)", kcal: 300, protein: 8, cat: "Bakery", alt: "puff" },
-            { name: "Veg Cutlet (വെജ് കട്ട്ലറ്റ്)", kcal: 240, protein: 5, cat: "Street", alt: "cutlet" },
-            { name: "Samosa Kerala Style (സമോസ)", kcal: 300, protein: 6, cat: "Street", alt: "samosa" },
-            { name: "Bonda (ബോണ്ട)", kcal: 280, protein: 4, cat: "Street", alt: "bonda" },
-            { name: "Pazham Nirachathu (പഴം നിറച്ചത്)", kcal: 310, protein: 3, cat: "Street", alt: "pazham" },
-
-            // PAYASAM VARIETY
-            { name: "Gothambu Payasam (ഗോതമ്പ് പായസം)", kcal: 260, protein: 6, cat: "Dessert", alt: "payasam" },
-            { name: "Aval Payasam (അവൽ പായസം)", kcal: 240, protein: 5, cat: "Dessert", alt: "payasam" },
-            { name: "Carrot Payasam (കാരറ്റ് പായസം)", kcal: 220, protein: 4, cat: "Dessert", alt: "payasam" },
-            { name: "Rice Payasam (അരി പായസം)", kcal: 230, protein: 4, cat: "Dessert", alt: "payasam" },
-            { name: "Paneer Payasam (പനീർ പായസം)", kcal: 300, protein: 10, cat: "Dessert", alt: "payasam" },
-            { name: "Palada Payasam (പാലട പായസം)", kcal: 350, protein: 6, cat: "Dessert", alt: "palada" },
-
-            // MORE SWEETS
-            { name: "Ela Ada (ഇല അട)", kcal: 230, protein: 4, cat: "Snack", alt: "ada" },
-            { name: "Chatti Pathiri Sweet (ചട്ടിപ്പത്തിരി)", kcal: 350, protein: 9, cat: "Malabar", alt: "pathiri" },
-            { name: "Kozhikodan Banana Halwa (ഹൽവ)", kcal: 390, protein: 2, cat: "Sweet", alt: "halwa alpaisa" },
-            { name: "Coconut Barfi (തേങ്ങ ബർഫി)", kcal: 450, protein: 4, cat: "Sweet", alt: "barfi" },
-            { name: "Milk Cake Kerala (മിൽക്ക് കേക്ക്)", kcal: 370, protein: 8, cat: "Sweet", alt: "cake" },
-            { name: "Jaggery Laddu (ലഡു)", kcal: 380, protein: 6, cat: "Sweet", alt: "laddu laddoo" },
-
-            // PICKLES & SIDES
-            { name: "Mango Pickle (മാങ്ങ അച്ചാർ)", kcal: 120, protein: 1, cat: "Pickle", alt: "manga achar" },
-            { name: "Lemon Pickle (നാരങ്ങ അച്ചാർ)", kcal: 100, protein: 1, cat: "Pickle", alt: "naranga achar" },
-            { name: "Fish Pickle (മീൻ അച്ചാർ)", kcal: 220, protein: 15, cat: "Pickle", alt: "meen achar" },
-            { name: "Prawn Pickle (ചെമ്മീൻ അച്ചാർ)", kcal: 230, protein: 18, cat: "Pickle", alt: "chemmeen achar" },
-            { name: "Chammanthi Podi (ചമ്മന്തി പൊടി)", kcal: 400, protein: 12, cat: "Side", alt: "podi" },
-            { name: "Coconut Chutney (തേങ്ങ ചമ്മന്തി)", kcal: 200, protein: 3, cat: "Side", alt: "chammanthi" },
-            // Gym
-            { name: "Chicken Breast (100g)", cal: 165, protein: 31, cat: "Gym" },
-            { name: "Egg Whites (5)", cal: 85, protein: 20, cat: "Gym" },
-            { name: "Whole Egg (1)", cal: 70, protein: 6, cat: "Gym" },
-            { name: "Oats (100g)", cal: 389, protein: 17, cat: "Gym" },
-            { name: "Peanut Butter (1 tbsp)", cal: 95, protein: 4, cat: "Gym" },
-            { name: "Whey Protein (1 scoop)", cal: 120, protein: 25, cat: "Gym" }
-        ];
-
-        // UI Handlers
-        const $ = id => document.getElementById(id);
-
-        // Toggle Login/Register
-        $('toggleAuthBtn').onclick = () => {
-            const isLogin = $('loginForm').style.display !== 'none';
-            $('loginForm').style.display = isLogin ? 'none' : 'block';
-            $('registerForm').style.display = isLogin ? 'block' : 'none';
-            $('toggleAuthBtn').innerText = isLogin ? 'Login' : 'Register';
-            $('toggleTxt').innerText = isLogin ? 'Already have account?' : 'No account?';
-        };
-
-        // Login
-        $('loginBtn').onclick = () => {
-            const email = $('loginEmail').value, pass = $('loginPassword').value;
-            auth.signInWithEmailAndPassword(email, pass).catch(err => alert(err.message));
-        };
-
-        // Register
-        $('registerBtn').onclick = () => {
-            const name = $('regName').value, email = $('regEmail').value, pass = $('regPassword').value;
-            auth.createUserWithEmailAndPassword(email, pass).then(cred => {
-                const uid = cred.user.uid;
-                db.ref('users/' + uid).set({ username: name, email, proteinGoal: 120, consistency: 0, points: 0 });
-            }).catch(err => alert(err.message));
-        };
-
-        // Auth State
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                currentUser = user;
-                $('authView').style.display = 'none';
-                $('mainApp').style.display = 'flex';
-                db.ref('users/' + user.uid).on('value', snap => {
-                    currentProfile = snap.val();
-                    updateProfileUI();
-                });
-                db.ref('presence/' + user.uid).set(true);
-                db.ref('presence/' + user.uid).onDisconnect().remove();
-                loadPublicMessages();
-                generateCalendar();
-                loadLeaderboard();
-                syncProtein();
-                listenForNotifs();
-            } else {
-                $('authView').style.display = 'flex';
-                $('mainApp').style.display = 'none';
-                currentUser = null;
-            }
-        });
-
-        function updateProfileUI() {
-            if (!currentProfile) return;
-            $('displayNameSetting').innerText = currentProfile.username;
-            $('proteinGoalSetting').innerText = currentProfile.proteinGoal + 'g';
-            $('proteinTargetNote').innerText = 'Goal: ' + currentProfile.proteinGoal + 'g';
-            currentTarget = currentProfile.proteinGoal;
-            updateCircles();
-        }
-
-        // Navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.onclick = () => {
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                item.classList.add('active');
-                const target = item.dataset.section;
-                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-                $(target).classList.add('active');
-                activeSection = target;
-                if (target === 'calendarSection') generateCalendar();
-            };
-        });
-
-        // Protein Logic
-        function syncProtein() {
-            const today = new Date().toISOString().split('T')[0];
-            db.ref(`users/${currentUser.uid}/logs/${today}/protein`).on('value', snap => {
-                proteinToday = snap.val() || 0;
-                updateCircles();
-            });
-        }
-
-        function updateCircles() {
-            const pct = Math.min(100, (proteinToday / currentTarget) * 100);
-            const angle = pct * 3.6;
-            $('proteinCircle').style.background = `conic-gradient(#ff7b4a 0deg ${angle}deg, #eef2f8 ${angle}deg 360deg)`;
-            $('proteinText').innerText = proteinToday + 'g';
-
-            // Mock Week/Month
-            $('weekPct').innerText = '75%';
-            $('monthPct').innerText = '62%';
-            $('weekCircle').style.background = `conic-gradient(#ff7b4a 0deg ${75 * 3.6}deg, #eef2f8 ${75 * 3.6}deg 360deg)`;
-            $('monthCircle').style.background = `conic-gradient(#1e2b4f 0deg ${62 * 3.6}deg, #eef2f8 ${62 * 3.6}deg 360deg)`;
-        }
-
-        $('addProteinBtn').onclick = () => {
-            const today = new Date().toISOString().split('T')[0];
-            const newCount = proteinToday + 20;
-            db.ref(`users/${currentUser.uid}/logs/${today}`).update({ protein: newCount });
-            if (newCount >= currentTarget) db.ref(`users/${currentUser.uid}/checks/${today}`).set(true);
-        };
-
-        // Save Quick add (Calories placeholder)
-        $('saveQuickAdd').onclick = () => {
-            const cal = $('quickCal').value;
-            if (!cal) return;
-            const today = new Date().toISOString().split('T')[0];
-            db.ref(`users/${currentUser.uid}/logs/${today}`).update({ calories: parseInt(cal) });
-            alert("Calories synced!");
-            $('quickCal').value = '';
-        };
-
-        // Calendar
-        function generateCalendar() {
-            const grid = $('calendarGrid');
-            grid.innerHTML = '';
-            const now = new Date();
-            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-            $('calMonthTitle').innerText = now.toLocaleString('default', { month: 'long', year: 'numeric' });
-
-            db.ref(`users/${currentUser.uid}/checks`).once('value', snap => {
-                const checks = snap.val() || {};
-                let count = 0;
-                for (let i = 1; i <= daysInMonth; i++) {
-                    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                    const day = document.createElement('div');
-                    day.className = 'cal-day';
-                    if (checks[dateStr]) { day.classList.add('checked'); count++; }
-                    if (i === now.getDate()) day.classList.add('today');
-                    day.innerText = i;
-                    grid.appendChild(day);
-                }
-                const streakPct = Math.round((count / daysInMonth) * 100);
-                $('monthStreakVal').innerText = streakPct + '%';
-                $('monthBar').style.width = streakPct + '%';
-            });
-        }
-
-        // Leaderboard
-        function loadLeaderboard() {
-            db.ref('users').orderByChild('points').limitToLast(50).on('value', snap => {
-                const users = [];
-                snap.forEach(child => users.push({ id: child.key, ...child.val() }));
-                users.reverse();
-                $('leaderboardList').innerHTML = users.map((u, i) => `
-        <div class="leaderboard-item" onclick="openPrivateChat('${u.id}', '${u.username}')">
-          <span class="rank">#${i + 1}</span>
-          <span class="name">${u.username}</span>
-          <span class="score">${u.consistency || 0}%</span>
+  // Load Orders with realtime listener
+  function loadOrders() {
+    const requestsRef = ref(db, 'requests');
+    onValue(requestsRef, (snapshot) => {
+      const data = snapshot.val();
+      const list = document.getElementById('requests-list');
+      if (!data) {
+        list.innerHTML = '<div class="text-center py-20 text-gray-600">No payment requests yet.</div>';
+        return;
+      }
+      const requests = Object.entries(data).reverse();
+      list.innerHTML = requests.map(([id, req]) => `
+        <div class="glass-card rounded-2xl p-6 flex flex-col md:flex-row justify-between gap-6">
+          <div class="space-y-4 flex-1">
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider status-${req.status}">
+                ${req.status}
+              </span>
+              <span class="text-xs text-gray-600 font-mono">#${id}</span>
+              <span class="text-xs text-gray-600">${new Date(req.timestamp).toLocaleString()}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <p class="text-[10px] uppercase font-bold text-gray-500 mb-1">User Info</p>
+                <p class="text-sm font-semibold text-white">${escapeHtml(req.userName)}</p>
+                <p class="text-xs text-gray-400">${escapeHtml(req.userEmail)}</p>
+              </div>
+              <div>
+                <p class="text-[10px] uppercase font-bold text-gray-500 mb-1">Minecraft Details</p>
+                <p class="text-sm font-semibold text-emerald-400">IGN: ${escapeHtml(req.ingameName)}</p>
+                <p class="text-xs text-gray-400">DC: ${escapeHtml(req.discordId)}</p>
+              </div>
+              <div>
+                <p class="text-[10px] uppercase font-bold text-gray-500 mb-1">Payment Info</p>
+                <p class="text-sm font-semibold text-amber-400">UPI: ${escapeHtml(req.upiId)}</p>
+                <p class="text-xs text-gray-400">Amount: ₹${req.total.toFixed(2)}</p>
+              </div>
+            </div>
+            <div class="pt-2">
+               <p class="text-[10px] uppercase font-bold text-gray-500 mb-2">Items Purchased</p>
+               <div class="flex flex-wrap gap-2">
+                 ${req.items.map(i => `<span class="bg-white/5 border border-white/10 px-2 py-1 rounded text-xs text-gray-300">${i.qty}x ${escapeHtml(i.name)}</span>`).join('')}
+               </div>
+            </div>
+          </div>
+          <div class="flex md:flex-col justify-end gap-2 border-t md:border-t-0 md:border-l border-white/5 pt-4 md:pt-0 md:pl-6">
+            <button onclick="updateStatus('${req.uid}', '${id}', 'approved')" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-500 hover:text-white px-6 py-2 rounded-xl text-sm font-bold border border-emerald-600/30 transition-all flex items-center justify-center gap-2">
+              <i data-lucide="check" class="w-4 h-4"></i> Approve
+            </button>
+            <button onclick="updateStatus('${req.uid}', '${id}', 'rejected')" class="bg-red-600/20 hover:bg-red-700 text-red-500 hover:text-white px-6 py-2 rounded-xl text-sm font-bold border border-red-600/30 transition-all flex items-center justify-center gap-2">
+              <i data-lucide="x" class="w-4 h-4"></i> Reject
+            </button>
+            <button onclick="deleteRequest('${req.uid}', '${id}')" class="bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white px-6 py-2 rounded-xl text-sm font-bold border border-white/10 transition-all flex items-center justify-center gap-2">
+              <i data-lucide="trash-2" class="w-4 h-4"></i> Delete
+            </button>
+          </div>
         </div>
       `).join('');
-            });
-        }
+      lucide.createIcons();
+    });
+  }
 
-        // Chat Sub-navigation
-        $('showPublicChat').onclick = () => {
-            $('publicChatPanel').style.display = 'block';
-            $('privateChatPanel').style.display = 'none';
-        };
-        $('showPrivateChat').onclick = () => {
-            $('publicChatPanel').style.display = 'none';
-            $('privateChatPanel').style.display = 'block';
-            // Load existing conversations if needed
-            $('privateList').innerHTML = '<div class="small-note">Select an athlete from Ranks to chat.</div>';
-        };
+  // ------------------- POLLS LOGIC -------------------
+  const colorOptions = [
+    { name: 'Red', val: 'red' }, { name: 'Green', val: 'emerald' }, { name: 'Blue', val: 'blue' },
+    { name: 'Orange', val: 'amber' }, { name: 'Purple', val: 'purple' }, { name: 'Pink', val: 'rose' }, { name: 'Gray', val: 'gray' }
+  ];
 
-        // Chat Logic
-        function loadPublicMessages() {
-            db.ref('public_chat').limitToLast(50).on('value', snap => {
-                let html = '';
-                snap.forEach(child => {
-                    const m = child.val();
-                    const isMe = m.uid === currentUser.uid;
-                    html += `<div class="bubble ${isMe ? 'me' : 'other'}">${!isMe ? '<span class="sender">' + m.name + '</span>' : ''}${m.text}</div>`;
-                });
-                $('publicMessages').innerHTML = html;
-                $('publicMessages').scrollTop = $('publicMessages').scrollHeight;
-            });
-        }
+  window.addOptionField = (text = '', color = 'blue') => {
+    const container = document.getElementById('options-container');
+    if (!container) return;
+    const div = document.createElement('div');
+    div.className = 'option-row flex gap-2 p-2 rounded-xl items-center';
+    div.innerHTML = `
+      <input type="text" class="opt-text flex-1 bg-transparent border-none outline-none text-xs" placeholder="Option text" value="${escapeHtml(text)}">
+      <select class="opt-color bg-white/5 border border-white/10 rounded-lg text-[10px] px-2 py-1 outline-none">
+        ${colorOptions.map(c => `<option value="${c.val}" ${c.val === color ? 'selected' : ''}>${c.name}</option>`).join('')}
+      </select>
+      <button onclick="this.parentElement.remove()" class="text-gray-600 hover:text-red-500 transition-colors">
+        <i data-lucide="x" class="w-3 h-3"></i>
+      </button>
+    `;
+    container.appendChild(div);
+    lucide.createIcons();
+  };
 
-        $('sendPublicBtn').onclick = () => {
-            const text = $('publicMsgInput').value.trim();
-            if (!text || !currentProfile) return;
-            db.ref('public_chat').push({ uid: currentUser.uid, name: currentProfile.username, text, ts: Date.now() });
-            $('publicMsgInput').value = '';
-        };
+  window.createPoll = async () => {
+    const title = document.getElementById('poll-title')?.value.trim();
+    const image = document.getElementById('poll-image')?.value.trim();
+    const content = document.getElementById('poll-content')?.value.trim();
+    const optionRows = document.querySelectorAll('#options-container .option-row');
+    const options = Array.from(optionRows).map(row => ({
+      text: row.querySelector('.opt-text')?.value.trim() || '',
+      color: row.querySelector('.opt-color')?.value || 'blue'
+    })).filter(o => o.text);
+    if (!title || !content || options.length === 0) {
+      alert("Please fill in title, content and at least one option");
+      return;
+    }
+    const newPollRef = push(ref(db, 'polls'));
+    await set(newPollRef, {
+      title,
+      image: image || 'https://i.ibb.co/G4xnSPpD/hero-banner.jpg',
+      content,
+      options,
+      timestamp: Date.now(),
+      status: 'active'
+    });
+    // Reset form
+    const titleInput = document.getElementById('poll-title');
+    const imageInput = document.getElementById('poll-image');
+    const contentInput = document.getElementById('poll-content');
+    if (titleInput) titleInput.value = '';
+    if (imageInput) imageInput.value = '';
+    if (contentInput) contentInput.value = '';
+    const optionsContainer = document.getElementById('options-container');
+    if (optionsContainer) optionsContainer.innerHTML = '';
+    window.addOptionField('Yes', 'emerald');
+    window.addOptionField('No', 'red');
+    alert("Poll created!");
+  };
 
-        function openPrivateChat(uid, username) {
-            if (uid === currentUser.uid) return;
-            activePrivateChatUid = uid;
-            $('chatInterface').style.display = 'block';
-            $('privateList').style.display = 'none';
-            $('activeChatName').innerText = username;
-            const chatId = [currentUser.uid, uid].sort().join('_');
-            db.ref('private_chats/' + chatId).off(); // clean prev
-            db.ref('private_chats/' + chatId).on('value', snap => {
-                let html = '';
-                snap.forEach(child => {
-                    const m = child.val();
-                    html += `<div class="bubble ${m.uid === currentUser.uid ? 'me' : 'other'}">${m.text}</div>`;
-                });
-                $('privateMessages').innerHTML = html;
-                $('privateMessages').scrollTop = $('privateMessages').scrollHeight;
-            });
-            // switch tab to social
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.querySelector('.nav-item[data-section="chatSection"]').classList.add('active');
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            $('chatSection').classList.add('active');
-        }
+  window.deletePoll = async (id) => {
+    if (!confirm("Are you sure? This will delete the poll and all votes.")) return;
+    await remove(ref(db, `polls/${id}`));
+    await remove(ref(db, `votes/${id}`));
+    alert("Poll deleted");
+  };
 
-        $('backToPrivateList').onclick = () => {
-            $('chatInterface').style.display = 'none';
-            $('privateList').style.display = 'block';
-        };
+  window.setWinner = async (pollId, optionText) => {
+    if (!confirm(`Mark "${optionText}" as the winner? This will close the poll.`)) return;
+    await update(ref(db, `polls/${pollId}`), {
+      winner: optionText,
+      status: 'completed'
+    });
+    alert("Winner set! Poll is now closed.");
+  };
 
-        $('sendPrivateBtn').onclick = () => {
-            const text = $('privateMsgInput').value.trim();
-            if (!text || !activePrivateChatUid) return;
-            const chatId = [currentUser.uid, activePrivateChatUid].sort().join('_');
-            db.ref('private_chats/' + chatId).push({ uid: currentUser.uid, text, ts: Date.now() });
-            $('privateMsgInput').value = '';
-        };
+  window.toggleVoters = (id) => {
+    const el = document.getElementById(`voters-${id}`);
+    if (el) el.classList.toggle('hidden');
+  };
 
-        // Food Search
-        $('foodSearchBtn').onclick = () => searchFoods();
-        $('foodSearchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') searchFoods(); });
-        function searchFoods() {
-            const query = $('foodSearchInput').value.toLowerCase();
-            const results = foodDB.filter(f =>
-                f.name.toLowerCase().includes(query) ||
-                (f.alt && f.alt.toLowerCase().includes(query))
-            );
-            $('foodResults').innerHTML = results.map(f => `
-      <div class="food-item">
-        <div class="food-info"><span class="food-name">${f.name}</span><span class="food-meta">${f.cat}</span></div>
-        <div class="food-stats">💪 ${f.protein}g | 🔥 ${(f.kcal || f.cal)}cal</div>
-      </div>
-    `).join('') || '<div class="small-note">No food found in "Swing" local database.</div>';
-        }
+  function loadPolls() {
+    const pollsRef = ref(db, 'polls');
+    const votesRef = ref(db, 'votes');
+    onValue(pollsRef, (snapshot) => {
+      const pollsData = snapshot.val();
+      const list = document.getElementById('polls-list');
+      if (!pollsData) {
+        if (list) list.innerHTML = '<div class="text-center py-20 text-gray-600">No polls created yet.</div>';
+        return;
+      }
+      onValue(votesRef, (voteSnap) => {
+        const votesData = voteSnap.val() || {};
+        const polls = Object.entries(pollsData).reverse();
+        if (!list) return;
+        list.innerHTML = polls.map(([id, poll]) => {
+          const pollVotes = votesData[id] || {};
+          const voteEntries = Object.values(pollVotes);
+          const total = voteEntries.length;
+          const pollOptions = poll.options || [{text: 'Yes', color: 'emerald'}, {text: 'No', color: 'red'}];
+          const resultsHtml = pollOptions.map(opt => {
+            const optText = typeof opt === 'object' ? opt.text : opt;
+            const optColor = typeof opt === 'object' ? opt.color : (optText.toLowerCase() === 'yes' ? 'emerald' : 'red');
+            const count = voteEntries.filter(v => v.option && v.option.toLowerCase() === optText.toLowerCase()).length;
+            const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+            const isWinner = poll.winner === optText;
+            return `
+              <div class="relative group">
+                <div class="flex justify-between text-xs font-bold mb-1">
+                  <div class="flex items-center gap-2">
+                    <span class="text-${optColor}-400">${escapeHtml(optText).toUpperCase()} (${count})</span>
+                    ${isWinner ? '<span class="bg-amber-500 text-[8px] text-white px-1.5 py-0.5 rounded uppercase">Winner</span>' : ''}
+                  </div>
+                  <span class="text-gray-500">${percent}%</span>
+                </div>
+                <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                  <div class="bg-${optColor}-500 h-full transition-all duration-500" style="width: ${percent}%"></div>
+                </div>
+                ${!poll.winner ? `
+                  <button onclick="setWinner('${id}', '${escapeHtml(optText).replace(/'/g, "\\'")}')" class="absolute -right-2 top-0 opacity-0 group-hover:opacity-100 bg-white/10 hover:bg-white/20 text-[8px] px-2 py-1 rounded transition-all">
+                    Set Winner
+                  </button>
+                ` : ''}
+              </div>
+            `;
+          }).join('');
+          const votersHtml = voteEntries.length > 0 ? voteEntries.map(v => `
+            <div class="flex justify-between items-center text-xs p-2 bg-white/5 rounded-lg border border-white/5">
+              <span class="text-gray-300">${escapeHtml(v.userEmail)}</span>
+              <span class="font-bold uppercase text-blue-400">${escapeHtml(v.option)}</span>
+            </div>
+          `).join('') : '<p class="text-gray-600 text-xs italic">No votes yet</p>';
+          return `
+            <div class="glass-card rounded-2xl overflow-hidden ${poll.winner ? 'ring-1 ring-amber-500/30' : ''}">
+              <div class="flex flex-col md:flex-row">
+                <div class="md:w-48 h-48 md:h-auto shrink-0 relative">
+                  <img src="${poll.image}" class="w-full h-full object-cover" onerror="this.src='https://i.ibb.co/G4xnSPpD/hero-banner.jpg'">
+                  ${poll.winner ? `
+                    <div class="absolute inset-0 bg-amber-500/20 flex items-center justify-center backdrop-blur-[2px]">
+                       <div class="winner-badge px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">Closed</div>
+                    </div>
+                  ` : ''}
+                </div>
+                <div class="p-6 flex-1 flex flex-col justify-between">
+                  <div>
+                    <div class="flex justify-between items-start mb-2">
+                      <div class="flex items-center gap-3">
+                        <h3 class="text-xl font-bold">${escapeHtml(poll.title)}</h3>
+                        ${poll.status === 'completed' ? '<span class="text-[10px] bg-white/5 text-gray-500 px-2 py-0.5 rounded border border-white/10 uppercase font-bold">Ended</span>' : ''}
+                      </div>
+                      <button onclick="deletePoll('${id}')" class="text-gray-500 hover:text-red-500 transition-colors">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                      </button>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-6">${escapeHtml(poll.content)}</p>
+                    <div class="space-y-6">
+                      ${resultsHtml}
+                    </div>
+                  </div>
+                  <div class="mt-6 pt-4 border-t border-white/5 flex justify-between items-center">
+                    <span class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Total Votes: ${total}</span>
+                    <button onclick="toggleVoters('${id}')" class="text-[10px] text-red-400 hover:text-red-300 uppercase tracking-widest font-bold">View Voter Details</button>
+                  </div>
+                </div>
+              </div>
+              <div id="voters-${id}" class="hidden p-6 bg-black/40 border-t border-white/5">
+                <h4 class="text-xs font-bold uppercase tracking-widest mb-4">Voter Log</h4>
+                <div class="max-h-40 overflow-y-auto space-y-2 pr-2 voters-scroll">
+                  ${votersHtml}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+        lucide.createIcons();
+      });
+    });
+  }
 
-        // Settings & Modals
-        $('editProteinBtn').onclick = () => $('goalModal').style.display = 'flex';
-        $('setGoalBtn').onclick = () => $('goalModal').style.display = 'flex';
-        $('closeGoalModal').onclick = () => $('goalModal').style.display = 'none';
-        $('saveGoalBtn').onclick = () => {
-            const newGoal = parseInt($('newGoalInput').value);
-            if (!newGoal) return;
-            db.ref('users/' + currentUser.uid).update({ proteinGoal: newGoal });
-            $('goalModal').style.display = 'none';
-        };
+  // Helper: escape HTML to prevent injection
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+      return c;
+    });
+  }
 
-        $('editNameBtn').onclick = () => {
-            $('newNameInput').value = currentProfile.username;
-            $('nameModal').style.display = 'flex';
-        };
-        $('closeNameModal').onclick = () => $('nameModal').style.display = 'none';
-        $('saveNameBtn').onclick = () => {
-            const newName = $('newNameInput').value.trim();
-            if (!newName) return;
-            db.ref('users/' + currentUser.uid).update({ username: newName });
-            $('nameModal').style.display = 'none';
-        };
+  // ------------------- TAB SWITCHING -------------------
+  const ordersSection = document.getElementById('orders-section');
+  const pollsSection = document.getElementById('polls-section');
+  const tabOrdersBtn = document.getElementById('tab-orders-btn');
+  const tabPollsBtn = document.getElementById('tab-polls-btn');
 
-        $('logoutBtn').onclick = () => auth.signOut();
+  function setActiveTab(tab) {
+    if (tab === 'orders') {
+      ordersSection?.classList.remove('hidden');
+      pollsSection?.classList.add('hidden');
+      tabOrdersBtn?.classList.add('tab-active');
+      tabOrdersBtn?.classList.remove('tab-inactive');
+      tabPollsBtn?.classList.add('tab-inactive');
+      tabPollsBtn?.classList.remove('tab-active');
+      // refresh icons in orders if needed
+      setTimeout(() => lucide.createIcons(), 50);
+    } else {
+      ordersSection?.classList.add('hidden');
+      pollsSection?.classList.remove('hidden');
+      tabPollsBtn?.classList.add('tab-active');
+      tabPollsBtn?.classList.remove('tab-inactive');
+      tabOrdersBtn?.classList.add('tab-inactive');
+      tabOrdersBtn?.classList.remove('tab-active');
+      setTimeout(() => lucide.createIcons(), 50);
+    }
+  }
 
-        // Search People
-        $('searchPeopleBtn').onclick = () => {
-            const q = $('searchPeopleInput').value.toLowerCase();
-            db.ref('users').once('value', snap => {
-                let html = '';
-                snap.forEach(child => {
-                    const u = child.val();
-                    if (u.username && u.username.toLowerCase().includes(q) && child.key !== currentUser.uid) {
-                        html += `<div class="leaderboard-item" onclick="openPrivateChat('${child.key}', '${u.username}')"><span class="name">${u.username}</span><i class="fas fa-comment" style="color:#ff7b4a;"></i></div>`;
-                    }
-                });
-                $('searchResults').innerHTML = html || '<div class="small-note">No athlete found.</div>';
-            });
-        };
+  if (tabOrdersBtn) tabOrdersBtn.addEventListener('click', () => setActiveTab('orders'));
+  if (tabPollsBtn) tabPollsBtn.addEventListener('click', () => setActiveTab('polls'));
 
-    </script>
+  // Initialize default options for poll creation form
+  function initPollForm() {
+    const container = document.getElementById('options-container');
+    if (container && container.children.length === 0) {
+      window.addOptionField('Yes', 'emerald');
+      window.addOptionField('No', 'red');
+    }
+  }
+
+  // Start realtime listeners
+  loadOrders();
+  loadPolls();
+  initPollForm();
+  
+  // Additional lucide init after all dynamic loading
+  setTimeout(() => lucide.createIcons(), 200);
+</script>
 </body>
-
 </html>
