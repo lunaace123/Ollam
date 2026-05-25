@@ -1,533 +1,302 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>MistMC Admin - Unified Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Montserrat:wght@900&display=swap" rel="stylesheet">
-  <style>
-    * {
-      -webkit-tap-highlight-color: transparent;
-    }
-    body {
-      background: #0e0e0e;
-      color: #fff;
-      font-family: 'Inter', sans-serif;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      -webkit-touch-callout: none;
-    }
-    .glass-card {
-      background: rgba(20,20,20,0.8);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-    .status-pending {
-      color: #f59e0b;
-      background: rgba(245,158,11,0.1);
-      border: 1px solid rgba(245,158,11,0.2);
-    }
-    .status-approved {
-      color: #10b981;
-      background: rgba(16,185,129,0.1);
-      border: 1px solid rgba(16,185,129,0.2);
-    }
-    .status-rejected {
-      color: #ef4444;
-      background: rgba(239,68,68,0.1);
-      border: 1px solid rgba(239,68,68,0.2);
-    }
-    .btn-red {
-      background: #ff4d4d;
-      color: #fff;
-      font-weight: 700;
-      transition: all 0.2s ease;
-    }
-    .btn-red:active {
-      transform: scale(0.97);
-    }
-    .option-row {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-    .winner-badge {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      box-shadow: 0 0 15px rgba(245,158,11,0.3);
-    }
-    .tab-active {
-      background: rgba(255, 77, 77, 0.15);
-      color: #ff4d4d;
-      border-color: rgba(255, 77, 77, 0.4);
-    }
-    .tab-inactive {
-      background: rgba(255,255,255,0.03);
-      color: #9ca3af;
-      border-color: rgba(255,255,255,0.08);
-    }
-    .voters-scroll::-webkit-scrollbar {
-      width: 4px;
-    }
-    .voters-scroll::-webkit-scrollbar-track {
-      background: #1f1f1f;
-      border-radius: 8px;
-    }
-    .voters-scroll::-webkit-scrollbar-thumb {
-      background: #ff4d4d;
-      border-radius: 8px;
-    }
-    /* responsive touch optimizations */
-    @media (max-width: 640px) {
-      button, .action-btn {
-        min-height: 44px;
-      }
-      .order-action-group {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: stretch;
-      }
-      .order-action-group button {
-        flex: 1;
-        justify-content: center;
-      }
-    }
-    @media (min-width: 768px) and (max-width: 1023px) {
-      .order-card-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-  </style>
-  <!-- disable context menu & devtools shortcuts -->
-  <script>
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C'))) {
-        e.preventDefault();
-      }
-    });
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Portal | Secure Nexus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ---------- ENTRANCE OVERLAY (first screen) ---------- */
+        .entrance-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 10%, #0a0f1e, #03060c);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            transition: opacity 1.2s cubic-bezier(0.23, 1, 0.32, 1), visibility 0s 1.2s;
+            backdrop-filter: blur(0px);
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, 'Poppins', sans-serif;
+        }
+
+        .entrance-card {
+            text-align: center;
+            max-width: 520px;
+            width: 90%;
+            background: rgba(12, 20, 35, 0.7);
+            backdrop-filter: blur(16px);
+            border-radius: 64px;
+            padding: 2.8rem 2rem;
+            border: 1px solid rgba(72, 187, 255, 0.4);
+            box-shadow: 0 30px 45px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 255, 255, 0.1);
+            transition: transform 0.4s ease;
+        }
+
+        .entrance-card h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #b5f0ff, #4d9eff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.75rem;
+        }
+
+        .entrance-sub {
+            color: #a0bbd9;
+            margin-bottom: 2rem;
+            font-weight: 400;
+            font-size: 1rem;
+            border-bottom: 1px dashed #2e4a7a;
+            display: inline-block;
+            padding-bottom: 6px;
+        }
+
+        .enter-pulse {
+            background: linear-gradient(95deg, #1d4ed8, #3b82f6);
+            border: none;
+            padding: 1rem 2.4rem;
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: white;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px -5px #1e3a8a80;
+            transition: all 0.25s;
+            font-family: monospace;
+            letter-spacing: 1px;
+            margin-top: 1rem;
+            width: 80%;
+        }
+
+        .enter-pulse:hover {
+            transform: scale(1.02);
+            background: linear-gradient(95deg, #2563eb, #60a5fa);
+            box-shadow: 0 20px 30px -8px #0f2b6d;
+            cursor: pointer;
+        }
+
+        .enter-pulse:active {
+            transform: scale(0.98);
+        }
+
+        .note {
+            margin-top: 1.8rem;
+            font-size: 0.75rem;
+            color: #5a789b;
+            font-family: monospace;
+        }
+
+        /* ---------- MAIN IFRAME / DASHBOARD CONTAINER ---------- */
+        .dashboard-container {
+            width: 100%;
+            height: 100vh;
+            background: #0b0e17;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.9s ease-in-out;
+            position: relative;
+        }
+
+        .dashboard-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            background: #f8fafc;
+        }
+
+        /* fallback loader while iframe loads (subtle) */
+        .iframe-loader {
+            position: absolute;
+            bottom: 20px;
+            right: 24px;
+            background: #11161fcc;
+            backdrop-filter: blur(8px);
+            padding: 6px 14px;
+            border-radius: 40px;
+            color: #9bbde2;
+            font-size: 12px;
+            font-family: monospace;
+            z-index: 10;
+            pointer-events: none;
+            transition: 0.2s;
+            border-left: 3px solid #3b82f6;
+        }
+
+        /* Responsive extras */
+        @media (max-width: 550px) {
+            .entrance-card h1 { font-size: 2.2rem; }
+            .enter-pulse { font-size: 1.3rem; padding: 0.8rem 1rem; width: 90%;}
+            .entrance-card { padding: 1.8rem 1rem; border-radius: 48px; }
+        }
+
+        /* make sure body takes full height, no scrollbars on entrance */
+        body {
+            margin: 0;
+            background: #000;
+            overflow-x: hidden;
+        }
+
+        .hidden-overlay {
+            opacity: 0;
+            visibility: hidden;
+        }
+    </style>
 </head>
-<body class="p-3 sm:p-6 md:p-8">
+<body>
 
-<div class="max-w-7xl mx-auto">
-  <!-- Responsive Header -->
-  <header class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 md:mb-8">
-    <div class="flex items-center gap-3 sm:gap-4">
-      <img src="https://i.ibb.co/Y7kd673X/6bdb793d-aa0a-4616-ae6b-42f4c7cafe46.png" alt="MistMC Logo" class="w-10 h-10 sm:w-12 sm:h-12 object-contain" />
-      <div>
-        <h1 class="text-2xl sm:text-3xl font-black text-white font-['Montserrat'] tracking-tight">ADMIN DASHBOARD</h1>
-        <p class="text-gray-500 text-xs sm:text-sm">Orders &amp; Polls Control Center</p>
-      </div>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="bg-red-500/10 text-red-500 px-2 py-1 sm:px-3 sm:py-1 rounded-lg border border-red-500/20 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest">Secure Access</span>
-    </div>
-  </header>
-
-  <!-- Tab Navigation - fully responsive with larger tap targets -->
-  <div class="flex gap-2 sm:gap-3 mb-6 md:mb-8 border-b border-white/10 pb-2 sm:pb-3">
-    <button id="tab-orders-btn" class="tab-active flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all border flex-1 sm:flex-none">
-      <i data-lucide="shopping-cart" class="w-4 h-4"></i> <span>Orders</span>
-    </button>
-    <button id="tab-polls-btn" class="tab-inactive flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wide transition-all border flex-1 sm:flex-none">
-      <i data-lucide="vote" class="w-4 h-4"></i> <span>Polls</span>
-    </button>
-  </div>
-
-  <!-- ORDERS SECTION -->
-  <div id="orders-section" class="transition-all duration-300">
-    <div id="requests-list" class="space-y-4 md:space-y-5">
-      <div class="text-center py-12 sm:py-20 text-gray-600">Loading payment requests...</div>
-    </div>
-  </div>
-
-  <!-- POLLS SECTION (hidden by default) -->
-  <div id="polls-section" class="hidden transition-all duration-300">
-    <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
-      <!-- Create Poll Form - Stacks on top for mobile -->
-      <div class="lg:w-1/3 w-full order-1 lg:order-2">
-        <div class="glass-card rounded-2xl p-5 sm:p-6 sticky top-4">
-          <h2 class="text-lg sm:text-xl font-bold mb-5 flex items-center gap-2">
-            <i data-lucide="plus-circle" class="text-red-500 w-5 h-5"></i> Create Poll
-          </h2>
-          <div class="space-y-4">
-            <div>
-              <label class="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Poll Title</label>
-              <input type="text" id="poll-title" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-red-500/50 outline-none transition-all" placeholder="e.g., Should we add Lifesteal?">
-            </div>
-            <div>
-              <label class="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Image URL (optional)</label>
-              <input type="text" id="poll-image" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-red-500/50 outline-none transition-all" placeholder="https://i.ibb.co/...">
-            </div>
-            <div>
-              <label class="text-[10px] uppercase font-bold text-gray-500 mb-2 block">Voting Options</label>
-              <div id="options-container" class="space-y-2 mb-3"></div>
-              <button onclick="window.addOptionField()" type="button" class="text-[10px] text-red-400 hover:text-red-300 font-bold uppercase tracking-widest flex items-center gap-1 mt-1">
-                <i data-lucide="plus" class="w-3 h-3"></i> Add Option
-              </button>
-            </div>
-            <div>
-              <label class="text-[10px] uppercase font-bold text-gray-500 mb-1 block">Description / Content</label>
-              <textarea id="poll-content" rows="4" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-red-500/50 outline-none transition-all resize-none" placeholder="Give more details about the poll..."></textarea>
-            </div>
-            <button onclick="window.createPoll()" class="btn-red w-full py-3.5 rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2">
-              <i data-lucide="send" class="w-4 h-4"></i> Create Poll
-            </button>
-          </div>
+    <!-- ENTRANCE SCREEN: user must "enter" to activate the change -->
+    <div id="entranceScreen" class="entrance-overlay">
+        <div class="entrance-card">
+            <h1>✦ PORTAL ✦</h1>
+            <div class="entrance-sub">restricted nexus · execute access</div>
+            <button id="enterButton" class="enter-pulse">⏎ ENTER SITE ⏎</button>
+            <div class="note">⚡ secure channel | will redirect to admin dashboard</div>
         </div>
-      </div>
-
-      <!-- Polls List - Takes remaining space -->
-      <div class="lg:w-2/3 w-full order-2 lg:order-1 space-y-5" id="polls-list">
-        <div class="text-center py-12 sm:py-20 text-gray-600">Loading polls...</div>
-      </div>
     </div>
-  </div>
-</div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import { getDatabase, ref, onValue, update, set, remove, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    <!-- MAIN TARGET: where the external dashboard (poopoopoooadmin.vercel.app) will be displayed -->
+    <div id="dashboardArea" class="dashboard-container" style="opacity: 0;">
+        <iframe id="targetIframe" title="Admin Panel" src="about:blank"></iframe>
+        <div class="iframe-loader" id="loaderHint">⚡ establishing secure link...</div>
+    </div>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAHrBE3doAhDni4mcNhylJD8o3r5cNZYSI",
-    authDomain: "ls-mannage.firebaseapp.com",
-    databaseURL: "https://ls-mannage-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "ls-mannage",
-    storageBucket: "ls-mannage.firebasestorage.app",
-    messagingSenderId: "115534926798",
-    appId: "1:115534926798:web:4ea3ab3c1a2d44e2e1d19f",
-    measurementId: "G-P2JQH8M41Y"
-  };
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // ------------------- ORDER MANAGEMENT (Full responsive) -------------------
-  window.updateStatus = async (uid, orderId, status) => {
-    try {
-      const updates = {};
-      updates[`requests/${orderId}/status`] = status;
-      updates[`orders/${uid}/${orderId}/status`] = status;
-      await update(ref(db), updates);
-      alert(`Order ${status}!`);
-    } catch (error) {
-      console.error(error);
-      alert("Failed to update status");
-    }
-  };
-
-  window.deleteRequest = async (uid, orderId) => {
-    if (!confirm("Are you sure you want to delete this request permanently?")) return;
-    try {
-      const updates = {};
-      updates[`requests/${orderId}`] = null;
-      if (uid && uid !== 'undefined' && uid !== 'null') {
-        updates[`orders/${uid}/${orderId}`] = null;
-      }
-      await update(ref(db), updates);
-      alert("Request deleted successfully!");
-    } catch (error) {
-      console.error("Delete failed:", error);
-      alert("Failed to delete: " + error.message);
-    }
-  };
-
-  function escapeHtml(str) {
-    if (!str) return '';
-    return String(str).replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
-    });
-  }
-
-  function loadOrders() {
-    const requestsRef = ref(db, 'requests');
-    onValue(requestsRef, (snapshot) => {
-      const data = snapshot.val();
-      const list = document.getElementById('requests-list');
-      if (!data) {
-        list.innerHTML = '<div class="text-center py-12 sm:py-20 text-gray-600">✨ No payment requests yet.</div>';
-        return;
-      }
-      const requests = Object.entries(data).reverse();
-      list.innerHTML = requests.map(([id, req]) => `
-        <div class="glass-card rounded-2xl p-4 sm:p-6 flex flex-col gap-5">
-          <!-- Header row with status & ID -->
-          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider status-${req.status}">
-              ${req.status}
-            </span>
-            <span class="text-xs text-gray-600 font-mono break-all">#${id.slice(0, 8)}</span>
-            <span class="text-xs text-gray-600">${new Date(req.timestamp).toLocaleString()}</span>
-          </div>
-          <!-- Info grids: stacks on mobile, 2 columns on tablet, 3 on desktop -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <p class="text-[10px] uppercase font-bold text-gray-500 mb-1">User Info</p>
-              <p class="text-sm font-semibold text-white truncate">${escapeHtml(req.userName)}</p>
-              <p class="text-xs text-gray-400 break-all">${escapeHtml(req.userEmail)}</p>
-            </div>
-            <div>
-              <p class="text-[10px] uppercase font-bold text-gray-500 mb-1">Minecraft Details</p>
-              <p class="text-sm font-semibold text-emerald-400">IGN: ${escapeHtml(req.ingameName)}</p>
-              <p class="text-xs text-gray-400 break-all">DC: ${escapeHtml(req.discordId)}</p>
-            </div>
-            <div>
-              <p class="text-[10px] uppercase font-bold text-gray-500 mb-1">Payment Info</p>
-              <p class="text-sm font-semibold text-amber-400 break-all">UPI: ${escapeHtml(req.upiId)}</p>
-              <p class="text-xs text-gray-400">Amount: ₹${req.total.toFixed(2)}</p>
-            </div>
-          </div>
-          <!-- Items purchased -->
-          <div>
-            <p class="text-[10px] uppercase font-bold text-gray-500 mb-2">Items Purchased</p>
-            <div class="flex flex-wrap gap-2">
-              ${req.items.map(i => `<span class="bg-white/5 border border-white/10 px-2 py-1 rounded text-xs text-gray-300">${i.qty}x ${escapeHtml(i.name)}</span>`).join('')}
-            </div>
-          </div>
-          <!-- Action Buttons - responsive row/column -->
-          <div class="flex flex-col sm:flex-row justify-end gap-2 pt-2 border-t border-white/5 mt-1">
-            <button onclick="updateStatus('${req.uid}', '${id}', 'approved')" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-500 hover:text-white px-4 py-2 rounded-xl text-sm font-bold border border-emerald-600/30 transition-all flex items-center justify-center gap-2 w-full sm:w-auto">
-              <i data-lucide="check" class="w-4 h-4"></i> Approve
-            </button>
-            <button onclick="updateStatus('${req.uid}', '${id}', 'rejected')" class="bg-red-600/20 hover:bg-red-700 text-red-500 hover:text-white px-4 py-2 rounded-xl text-sm font-bold border border-red-600/30 transition-all flex items-center justify-center gap-2 w-full sm:w-auto">
-              <i data-lucide="x" class="w-4 h-4"></i> Reject
-            </button>
-            <button onclick="deleteRequest('${req.uid}', '${id}')" class="bg-white/5 hover:bg-white/10 text-gray-500 hover:text-white px-4 py-2 rounded-xl text-sm font-bold border border-white/10 transition-all flex items-center justify-center gap-2 w-full sm:w-auto">
-              <i data-lucide="trash-2" class="w-4 h-4"></i> Delete
-            </button>
-          </div>
-        </div>
-      `).join('');
-      lucide.createIcons();
-    });
-  }
-
-  // ------------------- POLL MANAGEMENT (Responsive) -------------------
-  const colorOptions = [
-    { name: 'Red', val: 'red' }, { name: 'Green', val: 'emerald' }, { name: 'Blue', val: 'blue' },
-    { name: 'Orange', val: 'amber' }, { name: 'Purple', val: 'purple' }, { name: 'Pink', val: 'rose' }, { name: 'Gray', val: 'gray' }
-  ];
-
-  window.addOptionField = (text = '', color = 'blue') => {
-    const container = document.getElementById('options-container');
-    if (!container) return;
-    const div = document.createElement('div');
-    div.className = 'option-row flex flex-wrap sm:flex-nowrap gap-2 p-2 rounded-xl items-center';
-    div.innerHTML = `
-      <input type="text" class="opt-text flex-1 bg-transparent border border-white/10 rounded-lg px-2 py-1.5 text-xs outline-none focus:border-red-500/50" placeholder="Option text" value="${escapeHtml(text)}">
-      <select class="opt-color bg-white/5 border border-white/10 rounded-lg text-[10px] px-2 py-1.5 outline-none">
-        ${colorOptions.map(c => `<option value="${c.val}" ${c.val === color ? 'selected' : ''}>${c.name}</option>`).join('')}
-      </select>
-      <button onclick="this.parentElement.remove()" class="text-gray-600 hover:text-red-500 transition-colors p-1">
-        <i data-lucide="x" class="w-3.5 h-3.5"></i>
-      </button>
-    `;
-    container.appendChild(div);
-    lucide.createIcons();
-  };
-
-  window.createPoll = async () => {
-    const title = document.getElementById('poll-title')?.value.trim();
-    const image = document.getElementById('poll-image')?.value.trim();
-    const content = document.getElementById('poll-content')?.value.trim();
-    const optionRows = document.querySelectorAll('#options-container .option-row');
-    const options = Array.from(optionRows).map(row => ({
-      text: row.querySelector('.opt-text')?.value.trim() || '',
-      color: row.querySelector('.opt-color')?.value || 'blue'
-    })).filter(o => o.text);
-    if (!title || !content || options.length === 0) {
-      alert("Please fill in title, content and at least one option");
-      return;
-    }
-    const newPollRef = push(ref(db, 'polls'));
-    await set(newPollRef, {
-      title,
-      image: image || 'https://i.ibb.co/G4xnSPpD/hero-banner.jpg',
-      content,
-      options,
-      timestamp: Date.now(),
-      status: 'active'
-    });
-    // reset form
-    document.getElementById('poll-title').value = '';
-    document.getElementById('poll-image').value = '';
-    document.getElementById('poll-content').value = '';
-    const container = document.getElementById('options-container');
-    if (container) container.innerHTML = '';
-    window.addOptionField('Yes', 'emerald');
-    window.addOptionField('No', 'red');
-    alert("Poll created!");
-  };
-
-  window.deletePoll = async (id) => {
-    if (!confirm("Delete poll and all votes?")) return;
-    await remove(ref(db, `polls/${id}`));
-    await remove(ref(db, `votes/${id}`));
-    alert("Poll deleted");
-  };
-
-  window.setWinner = async (pollId, optionText) => {
-    if (!confirm(`Mark "${optionText}" as winner? Poll will be closed.`)) return;
-    await update(ref(db, `polls/${pollId}`), {
-      winner: optionText,
-      status: 'completed'
-    });
-    alert("Winner set! Poll closed.");
-  };
-
-  window.toggleVoters = (id) => {
-    const el = document.getElementById(`voters-${id}`);
-    if (el) el.classList.toggle('hidden');
-  };
-
-  function loadPolls() {
-    const pollsRef = ref(db, 'polls');
-    const votesRef = ref(db, 'votes');
-    onValue(pollsRef, (snapshot) => {
-      const pollsData = snapshot.val();
-      const list = document.getElementById('polls-list');
-      if (!pollsData) {
-        if (list) list.innerHTML = '<div class="text-center py-12 sm:py-20 text-gray-600">📊 No polls created yet.</div>';
-        return;
-      }
-      onValue(votesRef, (voteSnap) => {
-        const votesData = voteSnap.val() || {};
-        const polls = Object.entries(pollsData).reverse();
-        if (!list) return;
-        list.innerHTML = polls.map(([id, poll]) => {
-          const pollVotes = votesData[id] || {};
-          const voteEntries = Object.values(pollVotes);
-          const total = voteEntries.length;
-          const pollOptions = poll.options || [{text: 'Yes', color: 'emerald'}, {text: 'No', color: 'red'}];
-          const resultsHtml = pollOptions.map(opt => {
-            const optText = typeof opt === 'object' ? opt.text : opt;
-            const optColor = typeof opt === 'object' ? opt.color : (optText.toLowerCase() === 'yes' ? 'emerald' : 'red');
-            const count = voteEntries.filter(v => v.option && v.option.toLowerCase() === optText.toLowerCase()).length;
-            const percent = total > 0 ? Math.round((count / total) * 100) : 0;
-            const isWinner = poll.winner === optText;
-            return `
-              <div class="relative group">
-                <div class="flex justify-between text-xs font-bold mb-1">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <span class="text-${optColor}-400">${escapeHtml(optText).toUpperCase()} (${count})</span>
-                    ${isWinner ? '<span class="bg-amber-500 text-[8px] text-white px-1.5 py-0.5 rounded uppercase">Winner</span>' : ''}
-                  </div>
-                  <span class="text-gray-500">${percent}%</span>
-                </div>
-                <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                  <div class="bg-${optColor}-500 h-full transition-all duration-500" style="width: ${percent}%"></div>
-                </div>
-                ${!poll.winner ? `
-                  <button onclick="setWinner('${id}', '${escapeHtml(optText).replace(/'/g, "\\'")}')" class="absolute -right-1 top-0 opacity-0 group-hover:opacity-100 bg-white/10 hover:bg-white/20 text-[8px] px-2 py-1 rounded transition-all pointer-events-auto">
-                    Set Winner
-                  </button>
-                ` : ''}
-              </div>
-            `;
-          }).join('');
-          const votersHtml = voteEntries.length > 0 ? voteEntries.map(v => `
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 text-xs p-2 bg-white/5 rounded-lg border border-white/5">
-              <span class="text-gray-300 break-all">${escapeHtml(v.userEmail)}</span>
-              <span class="font-bold uppercase text-blue-400 text-[10px] sm:text-xs">${escapeHtml(v.option)}</span>
-            </div>
-          `).join('') : '<p class="text-gray-600 text-xs italic">No votes yet</p>';
-          return `
-            <div class="glass-card rounded-2xl overflow-hidden ${poll.winner ? 'ring-1 ring-amber-500/30' : ''}">
-              <div class="flex flex-col md:flex-row">
-                <div class="md:w-40 h-40 md:h-auto shrink-0 relative">
-                  <img src="${poll.image}" class="w-full h-full object-cover" onerror="this.src='https://i.ibb.co/G4xnSPpD/hero-banner.jpg'" alt="poll banner">
-                  ${poll.winner ? `
-                    <div class="absolute inset-0 bg-amber-500/20 flex items-center justify-center backdrop-blur-[2px]">
-                       <div class="winner-badge px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em]">Closed</div>
-                    </div>
-                  ` : ''}
-                </div>
-                <div class="p-5 flex-1 flex flex-col justify-between">
-                  <div>
-                    <div class="flex flex-wrap justify-between items-start gap-2 mb-2">
-                      <div class="flex items-center gap-2 flex-wrap">
-                        <h3 class="text-lg sm:text-xl font-bold break-words">${escapeHtml(poll.title)}</h3>
-                        ${poll.status === 'completed' ? '<span class="text-[9px] bg-white/5 text-gray-500 px-2 py-0.5 rounded border border-white/10 uppercase font-bold">Ended</span>' : ''}
-                      </div>
-                      <button onclick="deletePoll('${id}')" class="text-gray-500 hover:text-red-500 transition-colors p-1">
-                        <i data-lucide="trash-2" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-                      </button>
-                    </div>
-                    <p class="text-gray-400 text-sm mb-5 break-words">${escapeHtml(poll.content)}</p>
-                    <div class="space-y-5">
-                      ${resultsHtml}
-                    </div>
-                  </div>
-                  <div class="mt-5 pt-3 border-t border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                    <span class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Total Votes: ${total}</span>
-                    <button onclick="toggleVoters('${id}')" class="text-[10px] text-red-400 hover:text-red-300 uppercase tracking-widest font-bold flex items-center gap-1">
-                      <i data-lucide="users" class="w-3 h-3"></i> View Voter Details
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div id="voters-${id}" class="hidden p-5 bg-black/40 border-t border-white/5">
-                <h4 class="text-xs font-bold uppercase tracking-widest mb-3">Voter Log</h4>
-                <div class="max-h-48 overflow-y-auto space-y-2 pr-1 voters-scroll">
-                  ${votersHtml}
-                </div>
-              </div>
-            </div>
-          `;
-        }).join('');
-        lucide.createIcons();
-      });
-    });
-  }
-
-  // ------------------- TAB SWITCHING -------------------
-  const ordersSection = document.getElementById('orders-section');
-  const pollsSection = document.getElementById('polls-section');
-  const tabOrdersBtn = document.getElementById('tab-orders-btn');
-  const tabPollsBtn = document.getElementById('tab-polls-btn');
-
-  function setActiveTab(tab) {
-    if (tab === 'orders') {
-      ordersSection?.classList.remove('hidden');
-      pollsSection?.classList.add('hidden');
-      tabOrdersBtn?.classList.add('tab-active');
-      tabOrdersBtn?.classList.remove('tab-inactive');
-      tabPollsBtn?.classList.add('tab-inactive');
-      tabPollsBtn?.classList.remove('tab-active');
-      setTimeout(() => lucide.createIcons(), 50);
-    } else {
-      ordersSection?.classList.add('hidden');
-      pollsSection?.classList.remove('hidden');
-      tabPollsBtn?.classList.add('tab-active');
-      tabPollsBtn?.classList.remove('tab-inactive');
-      tabOrdersBtn?.classList.add('tab-inactive');
-      tabOrdersBtn?.classList.remove('tab-active');
-      setTimeout(() => lucide.createIcons(), 50);
-    }
-  }
-
-  if (tabOrdersBtn) tabOrdersBtn.addEventListener('click', () => setActiveTab('orders'));
-  if (tabPollsBtn) tabPollsBtn.addEventListener('click', () => setActiveTab('polls'));
-
-  // Initialize poll form with default options
-  function initPollForm() {
-    const container = document.getElementById('options-container');
-    if (container && container.children.length === 0) {
-      window.addOptionField('Yes', 'emerald');
-      window.addOptionField('No', 'red');
-    }
-  }
-
-  loadOrders();
-  loadPolls();
-  initPollForm();
-  setTimeout(() => lucide.createIcons(), 100);
-</script>
+    <script>
+        (function() {
+            // TARGET URL — exactly as specified
+            const TARGET_URL = "https://poopoopoooadmin.vercel.app/";
+            
+            // DOM elements
+            const entranceDiv = document.getElementById('entranceScreen');
+            const dashboardContainer = document.getElementById('dashboardArea');
+            const iframeElem = document.getElementById('targetIframe');
+            const loaderHint = document.getElementById('loaderHint');
+            
+            // flag to avoid double trigger
+            let transitionStarted = false;
+            
+            // Helper: perform the "site change" effect
+            function activateDashboard() {
+                if (transitionStarted) return;
+                transitionStarted = true;
+                
+                // Start preloading iframe content (optional but user sees seamless)
+                // set iframe src BEFORE animation finishes? we want smooth transition:
+                // we set src now, but the iframe will load in background while entrance fades.
+                iframeElem.src = TARGET_URL;
+                
+                // Show loading hint animation
+                if (loaderHint) {
+                    loaderHint.style.opacity = '1';
+                    loaderHint.textContent = '🌀 decrypting dashboard · loading secure view';
+                }
+                
+                // When iframe starts loading, we could update loader text, but fine.
+                // Fade out entrance overlay with class transition
+                entranceDiv.classList.add('hidden-overlay');
+                
+                // After entrance overlay is hidden (transition), we show dashboard container with fade in
+                // Ensure dashboard becomes visible with opacity transition
+                // But need to set dashboard opacity to 1 slightly after entrance start to avoid flicker.
+                // We will set it after 80ms to let entrance visibility hide but smoothness.
+                setTimeout(() => {
+                    // Make dashboard container fully opaque
+                    dashboardContainer.style.opacity = '1';
+                    // Also update loader text once iframe loads, else keep subtle.
+                }, 100);
+                
+                // When iframe finishes loading, update loader hint to success style
+                iframeElem.addEventListener('load', function onLoad() {
+                    if (loaderHint) {
+                        loaderHint.textContent = '✓ dashboard active · live session';
+                        loaderHint.style.borderLeftColor = '#22c55e';
+                        loaderHint.style.backgroundColor = '#0f172ad9';
+                        setTimeout(() => {
+                            if (loaderHint) loaderHint.style.opacity = '0.6';
+                        }, 2500);
+                    }
+                    // remove listener after first load
+                    iframeElem.removeEventListener('load', onLoad);
+                });
+                
+                // In case of iframe error (CORS or network) we could show fallback but target is public.
+                iframeElem.addEventListener('error', function() {
+                    if (loaderHint) {
+                        loaderHint.textContent = '⚠️ connection warning · retrying';
+                        loaderHint.style.borderLeftColor = '#f97316';
+                    }
+                });
+            }
+            
+            // --- ENTER BUTTON triggers the site change ---
+            const enterBtn = document.getElementById('enterButton');
+            if (enterBtn) {
+                enterBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    activateDashboard();
+                });
+            }
+            
+            // optional: support pressing "Enter" key while on entrance screen (accessibility)
+            window.addEventListener('keydown', (e) => {
+                if (!transitionStarted && entranceDiv && !entranceDiv.classList.contains('hidden-overlay')) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        activateDashboard();
+                    }
+                }
+            });
+            
+            // small extra: clean up any remnants, and if someone clicks on overlay background (not the card) we don't trigger.
+            // but only button / enter key will activate. also prevents accidental double trigger
+            // Edge case: after transition, ensure iframe doesn't reload unintentionally
+            // Provide a backup: if somehow the iframe fails to load due to restrictive headers, but page is embeddable.
+            // since target is vercel app and allows framing (X-Frame-Options not set generally) we are safe.
+            
+            // Preload slight prefetch? not needed, but we add a small preconnect hint to improve perceived speed
+            const preconnectLink = document.createElement('link');
+            preconnectLink.rel = 'preconnect';
+            preconnectLink.href = 'https://poopoopoooadmin.vercel.app';
+            document.head.appendChild(preconnectLink);
+            
+            // Also if user revisits? no problem
+            // add bonus smooth cursor effect
+            console.log('✨ entrance ready — click "ENTER SITE" to load admin dashboard');
+        })();
+    </script>
+    
+    <!-- additional fallback styles for iframe sizing -->
+    <style>
+        /* ensure dashboard container covers entire viewport without scroll on body */
+        body, html {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        .dashboard-container {
+            transition: opacity 0.85s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            background: #010409;
+        }
+        iframe {
+            background: #ffffff;
+        }
+        /* entrance overlay higher z-index */
+        .entrance-overlay {
+            z-index: 9999;
+        }
+    </style>
 </body>
 </html>
